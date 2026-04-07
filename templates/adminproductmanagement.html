@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Management</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background: #f4f6f9;
+      }
+
+      .sidebar {
+        width: 230px;
+        background: #2f3542;
+        color: white;
+        padding: 20px;
+      }
+
+      .sidebar h2 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 12px;
+        margin-bottom: 8px;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.2s;
+      }
+
+      .sidebar a:hover,
+      .sidebar a.active {
+        background: #57606f;
+      }
+
+      .main {
+        flex: 1;
+        padding: 30px;
+        transition: margin-right 0.3s ease;
+      }
+
+      .main.sidebar-open {
+        margin-right: 380px;
+      }
+
+      .header {
+        margin-bottom: 25px;
+      }
+
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .message-list {
+        margin-bottom: 20px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        display: none;
+      }
+
+      .message-list.success {
+        background: #dcfce7;
+        color: #166534;
+        display: block;
+      }
+
+      .message-list.error {
+        background: #fee2e2;
+        color: #991b1b;
+        display: block;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .field label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: #555;
+      }
+
+      .field input,
+      .field button {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+      }
+
+      .field button {
+        border: none;
+        background: #2f3542;
+        color: white;
+        cursor: pointer;
+      }
+
+      table {
+        width: 100%;
+        margin-top: 15px;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      thead,
+      tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+
+      tbody {
+        display: block;
+        max-height: 320px;
+        overflow-y: auto;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: top;
+      }
+
+      tbody tr {
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      tbody tr:hover {
+        background-color: #f0f2f5;
+      }
+
+      .history-list {
+        list-style: none;
+      }
+
+      .history-list li {
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .empty-state {
+        color: #555;
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 998;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      .product-sidebar {
+        position: fixed;
+        right: -380px;
+        top: 0;
+        width: 380px;
+        height: 100vh;
+        background: white;
+        box-shadow: -4px 0 15px rgba(0, 0, 0, 0.15);
+        z-index: 999;
+        transition: right 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .product-sidebar.active {
+        right: 0;
+      }
+
+      .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8f9fa;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+      }
+
+      .sidebar-content {
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .sidebar-content .field {
+        margin-bottom: 15px;
+      }
+
+      .sidebar-content .field input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+      }
+
+      .btn-danger {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #e74c3c;
+        color: white;
+        cursor: pointer;
+      }
+
+      .price-history-section {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .price-history-section h4 {
+        margin-bottom: 15px;
+        font-size: 14px;
+        color: #2f3542;
+        text-transform: uppercase;
+      }
+
+      #priceHistoryDisplay {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 12px;
+      }
+
+      .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: #f9f9f9;
+        border-radius: 6px;
+      }
+
+      .history-item-date {
+        font-size: 12px;
+        color: #888;
+      }
+
+      .history-item-change {
+        font-size: 13px;
+        color: #2f3542;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <h2>Admin</h2>
+
+      <a href="{{ url_for('admindashboard') }}">Dashboard</a>
+      <a href="{{ url_for('adminproductmanagement') }}" class="active">Product Management</a>
+      <a href="{{ url_for('admindiscountmanagement') }}">Discount Management</a>
+      <a href="#">Settings</a>
+
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <div class="main">
+      <div class="message-list" id="statusMessage"></div>
+
+      <div class="header">
+        <h1>Product Management</h1>
+        <p>Welcome, Coupal:)</p>
+      </div>
+
+      <div class="card">
+        <h3>Product Management</h3>
+        <p>Admin can create, update, and remove product prices here.</p>
+
+        <form id="pricingForm">
+          <div class="form-row">
+            <div class="field">
+              <label for="product_id">Product ID</label>
+              <input type="text" name="product_id" id="product_id" required />
+            </div>
+
+            <div class="field">
+              <label for="price">Price</label>
+              <input type="number" name="price" id="price" required />
+            </div>
+
+            <div class="field">
+              <label>&nbsp;</label>
+              <button type="submit">Save Price</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Product List and Base Price</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Product ID</th>
+              <th>Base Price</th>
+              <th>Price History</th>
+            </tr>
+          </thead>
+          <tbody id="pricingTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="product-sidebar" id="productSidebar">
+      <div class="sidebar-header">
+        <h3>Product Details</h3>
+        <button class="close-btn" id="closeSidebarBtn">&times;</button>
+      </div>
+      <div class="sidebar-content">
+        <div class="field">
+          <label for="sidebarProductId">Product ID</label>
+          <input type="text" id="sidebarProductId" />
+        </div>
+        <div class="field">
+          <label for="sidebarPrice">Base Price (₱)</label>
+          <input type="number" id="sidebarPrice" step="0.01" min="0.01" />
+        </div>
+        <button id="removeProductBtn" class="btn-danger">Remove Product</button>
+      </div>
+      <div class="price-history-section">
+        <h4>Price Changes</h4>
+        <div id="priceHistoryDisplay"></div>
+      </div>
+    </div>
+
+    <script>
+      const storageKey = "pricing_products";
+      const pricingForm = document.getElementById("pricingForm");
+      const productIdInput = document.getElementById("product_id");
+      const priceInput = document.getElementById("price");
+      const pricingTableBody = document.getElementById("pricingTableBody");
+      const statusMessage = document.getElementById("statusMessage");
+      const productListId = "savedProductIdsAdmin";
+
+      const productSidebar = document.getElementById("productSidebar");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+      const sidebarProductIdInput = document.getElementById("sidebarProductId");
+      const sidebarPriceInput = document.getElementById("sidebarPrice");
+      const removeProductBtn = document.getElementById("removeProductBtn");
+      const priceHistoryDisplay = document.getElementById("priceHistoryDisplay");
+      const mainDiv = document.querySelector(".main");         
+
+      let currentProductId = null;
+
+      function getProducts() {
+        const savedProducts = localStorage.getItem(storageKey);
+        return savedProducts ? JSON.parse(savedProducts) : [];
+      }
+
+      function saveProducts(products) {
+        localStorage.setItem(storageKey, JSON.stringify(products));
+      }
+
+      function showMessage(message, type) {
+        statusMessage.textContent = message;
+        statusMessage.className = "message-list " + type;
+      }
+
+      function formatPrice(price) {
+        return Number(price).toFixed(2);
+      }
+
+      function renderProductOptions() {
+        const products = getProducts().slice().sort((a, b) => Number(a.id) - Number(b.id));
+        let datalist = document.getElementById(productListId);
+
+        if (!datalist) {
+          datalist = document.createElement("datalist");
+          datalist.id = productListId;
+          document.body.appendChild(datalist);
+        }
+
+        datalist.innerHTML = products.map((product) => `<option value="${product.id}"></option>`).join("");
+        productIdInput.setAttribute("list", productListId);
+      }
+
+      function formatPriceHistory(product) {
+        if (!product.price_history || product.price_history.length === 0) {
+          return "<span style='color: #999;'>No price changes yet.</span>";
+        }
+
+        return product.price_history
+          .map((entry) => {
+            const priceText =
+              entry.old_price === null
+                ? `Initial: ₱ ${formatPrice(entry.new_price)}`
+                : `₱ ${formatPrice(entry.old_price)} -> ₱ ${formatPrice(entry.new_price)}`;
+            const date = new Date(entry.timestamp).toLocaleDateString();
+            return `
+              <div class="history-item">
+                <div class="history-item-date">${date}</div>
+                <div class="history-item-change">${priceText}</div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      function openSidebar(product) {
+        currentProductId = product.id;
+        sidebarProductIdInput.value = product.id;
+        sidebarPriceInput.value = formatPrice(product.base_price);
+        priceHistoryDisplay.innerHTML = formatPriceHistory(product);
+        productSidebar.classList.add("active");
+        sidebarOverlay.classList.add("active");
+        mainDiv.classList.add("sidebar-open");
+      }
+
+      function closeSidebar() {
+        productSidebar.classList.remove("active");
+        sidebarOverlay.classList.remove("active");
+        mainDiv.classList.remove("sidebar-open");
+        sidebarProductIdInput.value = "";
+        sidebarPriceInput.value = "";
+        priceHistoryDisplay.innerHTML = "";
+        currentProductId = null;
+      }
+
+      function updateProductField(field, value) {
+        const products = getProducts();
+        const productIndex = products.findIndex((product) => product.id === currentProductId);
+
+        if (productIndex === -1) {
+          showMessage("Product not found.", "error");
+          return;
+        }
+
+        const product = products[productIndex];
+        const timestamp = new Date().toLocaleString();
+
+        if (field === "id") {
+          const newId = value.trim();
+          if (!newId) {
+            showMessage("Product ID cannot be empty.", "error");
+            return;
+          }
+
+          if (products.find((item) => item.id === newId && item.id !== currentProductId)) {
+            showMessage("Product ID already exists.", "error");
+            return;
+          }
+
+          product.id = newId;
+          currentProductId = newId;
+        }
+
+        if (field === "price") {
+          const newPrice = Number(value);
+          if (newPrice <= 0) {
+            showMessage("Price must be greater than 0.", "error");
+            return;
+          }
+
+          if (newPrice !== product.base_price) {
+            product.price_history.push({
+              old_price: product.base_price,
+              new_price: newPrice,
+              timestamp: timestamp,
+            });
+            product.base_price = newPrice;
+          }
+        }
+
+        saveProducts(products);
+        renderProductOptions();
+        renderProducts();
+
+        const updatedProduct = products.find((item) => item.id === currentProductId);
+        if (updatedProduct) {
+          openSidebar(updatedProduct);
+        }
+
+        showMessage(`Product ${field} updated.`, "success");
+      }
+
+      function deleteProduct(productId) {
+        if (!confirm("Are you sure you want to delete this product?")) {
+          return;
+        }
+
+        const products = getProducts().filter((product) => product.id !== productId);
+        saveProducts(products);
+        closeSidebar();
+        renderProductOptions();
+        renderProducts();
+        showMessage("Product deleted.", "success");
+      }
+
+      function renderProducts() {
+        const products = getProducts();
+        pricingTableBody.innerHTML = "";
+
+        if (products.length === 0) {
+          pricingTableBody.innerHTML = `
+            <tr>
+              <td colspan="3" class="empty-state">No products saved yet.</td>
+            </tr>
+          `;
+          return;
+        }
+
+        products.forEach((product) => {
+          const historyItems = product.price_history
+            .slice()
+            .reverse()
+            .map((entry) => {
+              const priceText =
+                entry.old_price === null
+                  ? `Initial: ₱ ${formatPrice(entry.new_price)}`
+                  : `₱ ${formatPrice(entry.old_price)} to ₱ ${formatPrice(entry.new_price)}`;
+              return `<li>${priceText}<br /><small>${entry.timestamp}</small></li>`;
+            })
+            .join("");
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${product.id}</td>
+            <td>₱ ${formatPrice(product.base_price)}</td>
+            <td><ul class="history-list">${historyItems}</ul></td>
+          `;
+
+          row.addEventListener("click", function () {
+            openSidebar(product);
+          });
+
+          pricingTableBody.appendChild(row);
+        });
+      }
+
+      pricingForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const productId = productIdInput.value.trim();
+        const price = priceInput.value.trim();
+
+        if (productId === "" || price === "") {
+          showMessage("Product ID and price are required.", "error");
+          return;
+        }
+
+        if (Number(price) <= 0) {
+          showMessage("Price must be greater than 0.", "error");
+          return;
+        }
+
+        const products = getProducts();
+        const existingProduct = products.find((product) => String(product.id) === productId);
+        const timestamp = new Date().toLocaleString();
+
+        if (existingProduct) {
+          existingProduct.price_history.push({
+            old_price: Number(existingProduct.base_price),
+            new_price: Number(price),
+            timestamp: timestamp,
+          });
+          existingProduct.base_price = Number(price);
+          showMessage("Product price updated successfully.", "success");
+        } else {
+          products.push({
+            id: productId,
+            base_price: Number(price),
+            price_history: [
+              {
+                old_price: null,
+                new_price: Number(price),
+                timestamp: timestamp,
+              },
+            ],
+          });
+          showMessage("Product created successfully.", "success");
+        }
+
+        saveProducts(products);
+        renderProductOptions();
+        renderProducts();
+        pricingForm.reset();
+      });
+
+      closeSidebarBtn.addEventListener("click", closeSidebar);
+      sidebarOverlay.addEventListener("click", closeSidebar);
+
+      sidebarProductIdInput.addEventListener("change", function () {
+        const newId = this.value.trim();
+        if (newId && newId !== currentProductId) {
+          updateProductField("id", newId);
+        }
+      });
+
+      sidebarPriceInput.addEventListener("change", function () {
+        const newPrice = Number(this.value);
+        const products = getProducts();
+        const product = products.find((item) => item.id === currentProductId);
+
+        if (product && newPrice !== product.base_price) {
+          updateProductField("price", newPrice);
+        }
+      });
+
+      removeProductBtn.addEventListener("click", function () {
+        if (currentProductId) {
+          deleteProduct(currentProductId);
+        }
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && productSidebar.classList.contains("active")) {
+          closeSidebar();
+        }
+      });
+
+      renderProductOptions();
+      renderProducts();
+    </script>
+  </body>
+</html>

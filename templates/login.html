@@ -1,0 +1,121 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="https://pyscript.net" />
+    <script type="module" src="https://pyscript.net"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+        background: linear-gradient(rgba(0, 50, 0, 0.4), rgba(0, 80, 0, 0.4)),
+          url("https://images.unsplash.com/photo-1501785888041-af3ef285b470")
+            no-repeat center/cover;
+      }
+
+      .login-container {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 40px;
+        width: 360px;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        color: #fff;
+      }
+
+      .login-container h1 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #e6ffe6;
+        letter-spacing: 1px;
+      }
+
+      .message {
+        text-align: center;
+        color: #ffcccc;
+        min-height: 24px;
+        margin-bottom: 15px;
+      }
+
+      .input-group {
+        margin-bottom: 18px;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      input::placeholder {
+        color: #e0e0e0;
+      }
+
+      input:focus {
+        outline: none;
+        border: 1px solid #a8e6a3;
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #2e7d32, #66bb6a);
+        color: white;
+        font-size: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background: linear-gradient(135deg, #1b5e20, #4caf50);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="login-container">
+      <h1>Welcome</h1>
+
+      <div class="message">{{ message }}</div>
+
+      <form action="{{ url_for('login') }}" method="post">
+        <div class="input-group">
+          <input type="text" name="username" placeholder="Username" required />
+        </div>
+
+        <div class="input-group">
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  </body>
+</html>
