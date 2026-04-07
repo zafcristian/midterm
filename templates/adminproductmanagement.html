@@ -111,7 +111,7 @@
 
       .field button {
         border: none;
-        background: #2f3542;
+        background: #3c4558;
         color: white;
         cursor: pointer;
       }
@@ -290,7 +290,7 @@
 
       <a href="{{ url_for('admindashboard') }}">Dashboard</a>
       <a href="{{ url_for('adminproductmanagement') }}" class="active">Product Management</a>
-      <a href="{{ url_for('admindiscountmanagement') }}">Discount Management</a>
+      <a href="#">Discount Management</a>
       <a href="#">Settings</a>
 
       <a href="{{ url_for('logout') }}">Logout</a>
@@ -357,7 +357,7 @@
         </div>
         <div class="field">
           <label for="sidebarPrice">Base Price (₱)</label>
-          <input type="number" id="sidebarPrice" step="0.01" min="0.01" />
+          <input type="number" id="sidebarPrice" step="10" min="100" />
         </div>
         <button id="removeProductBtn" class="btn-danger">Remove Product</button>
       </div>
