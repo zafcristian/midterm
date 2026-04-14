@@ -1,3 +1,15 @@
+PRODUCT PRICING AND DISCOUNT MANAGEMENT SYSTEM
+GROUP 12 BSCS 1B
+1.CHARLES INSON
+2.PENIEL LANOY
+3.RONALD GOMEZ
+4.CRISTIAN ZAFRA
+
+
+PROGRESSIVE REPORT: Start designing our admin dashboard, we added some features/function like add prod id, set product price, and view the list of added product, added sidebar overlay button.
+
+
+
 module1:
 in our module 1 we start designing our admin dashboard and we add some features/function on it like add product ID, set PRICE, 
 and see the list of the added product and, then we need to fix the problem that when we finished entering the added product ID and set PRICE it will display but when we refresh the browser
