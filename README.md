@@ -23,6 +23,8 @@ and also we add sidebar overlay button to edit product and edit the price of the
 
 
 
+-------------------------------------------------------------------------------------------------------------
+
 
 PROGRESSIVE REPORT: Start making the module 2 our module 2 is discount management system
 
