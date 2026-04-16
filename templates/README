@@ -1,14 +1,1 @@
-GROUP 12 PRODUCTS PRICING AND DISCOUNT MANAGEMENT 
-BSCS 1-B
-1. Charles Inson
-2. Peniel Lanoy
-3. Ronald Gomez
-4. Cristian Zafra
 
-
-module1:
-in module 1 we change our login because when we try to login with different password it will render in the dashboard even our password we type is incorrect we use AI to help fix the problem
-module 2:
-in our module 2 we start designing our admin dashboard and we add some features/function on it like add product ID, set PRICE, 
-and see the list of the added product and, then we need to fix the problem that when we finished entering the added product ID and set PRICE it will display but when we refresh the browser
-it will dissapear so thats the problem are we working now. And we hope we finished our project.
