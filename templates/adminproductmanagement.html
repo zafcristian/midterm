@@ -233,12 +233,13 @@
         border-radius: 6px;
       }
 
+
       .btn-danger {
         width: 100%;
-        padding: 10px;
+        padding: 10;
         border: none;
-        border-radius: 6px;
-        background: #e74c3c;
+        border-radius: 9px;
+        background: #cf4738;
         color: white;
         cursor: pointer;
       }
@@ -290,7 +291,7 @@
 
       <a href="{{ url_for('admindashboard') }}">Dashboard</a>
       <a href="{{ url_for('adminproductmanagement') }}" class="active">Product Management</a>
-      <a href="#">Discount Management</a>
+      <a href="{{ url_for('admindiscountmanagement') }}">Discount Management</a>
       <a href="#">Settings</a>
 
       <a href="{{ url_for('logout') }}">Logout</a>
@@ -301,7 +302,7 @@
 
       <div class="header">
         <h1>Product Management</h1>
-        <p>Welcome, Coupal:)</p>
+        <p>Welcome, Admin:)</p>
       </div>
 
       <div class="card">
@@ -357,8 +358,10 @@
         </div>
         <div class="field">
           <label for="sidebarPrice">Base Price (₱)</label>
-          <input type="number" id="sidebarPrice" step="10" min="100" />
-        </div>
+          <input type="number" id="sidebarPrice"/>
+        </div>     
+        <button id="changeProductbtn" class="btn-danger">Save Changes</button>       
+     
         <button id="removeProductBtn" class="btn-danger">Remove Product</button>
       </div>
       <div class="price-history-section">

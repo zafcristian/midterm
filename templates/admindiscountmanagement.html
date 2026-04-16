@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discount Management</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background: #f4f6f9;
+      }
+
+      .sidebar {
+        width: 230px;
+        background: #2f3542;
+        color: white;
+        padding: 20px;
+      }
+
+      .sidebar h2 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 12px;
+        margin-bottom: 8px;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.2s;
+      }
+
+      .sidebar a:hover,
+      .sidebar a.active {
+        background: #57606f;
+      }
+
+      .main {
+        flex: 1;
+        padding: 30px;
+      }
+
+      .header {
+        margin-bottom: 25px;
+      }
+
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .message-list {
+        margin-bottom: 20px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        display: none;
+      }
+
+      .message-list.success {
+        background: #dcfce7;
+        color: #166534;
+        display: block;
+      }
+
+      .message-list.error {
+        background: #fee2e2;
+        color: #991b1b;
+        display: block;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .field label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: #555;
+      }
+
+      .field input,
+      .field select,
+      .field button {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+      }
+
+      .field select {
+        background: white;
+        color: #111827;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: linear-gradient(45deg, transparent 50%, #64748b 50%),
+          linear-gradient(135deg, #64748b 50%, transparent 50%);
+        background-position: calc(100% - 18px) calc(50% - 3px),
+          calc(100% - 12px) calc(50% - 3px);
+        background-size: 6px 6px, 6px 6px;
+        background-repeat: no-repeat;
+        padding-right: 36px;
+      }
+
+      .field button {
+        border: none;
+        background: #2f3542;
+        color: white;
+        cursor: pointer;
+      }
+
+      table {
+        width: 100%;
+        margin-top: 15px;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      thead,
+      tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+
+      tbody {
+        display: block;
+        max-height: 320px;
+        overflow-y: auto;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: top;
+      }
+
+      .empty-state {
+        color: #555;
+      }
+
+      .remove-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        background: #e74c3c;
+        color: white;
+        cursor: pointer;
+      }
+
+      .expiring-soon {
+        background-color: #fff3cd !important;
+      }
+
+      .expiring-soon td {
+        color: #856404;
+        font-weight: 500;
+      }
+
+      .countdown {
+        font-weight: bold;
+        color: #d9534f;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <h2>Admin</h2>
+
+      <a href="{{ url_for('admindashboard') }}">Dashboard</a>
+      <a href="{{ url_for('adminproductmanagement') }}">Product Management</a>
+      <a href="{{ url_for('admindiscountmanagement') }}" class="active">Discount Management</a>
+      <a href="#">Settings</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <div class="main">
+      <div class="message-list" id="statusMessage"></div>
+
+      <div class="header">
+        <h1>Discount Management</h1>
+        <p>Welcome, Admin:)</p>
+      </div>
+
+      <div class="card">
+        <h3>Create or Update Discount</h3>
+        <p>Discount is percent-only and applies immediately to an existing product.</p>
+
+        <form id="discountForm">
+          <div class="form-row">
+            <div class="field">
+              <label for="product_id">Product ID</label>
+              <input type="text" name="product_id" id="product_id" required />
+            </div>
+
+            <div class="field">
+              <label for="discount_percent"> Select Discount Percent</label>
+              <select
+                name="discount_percent"
+                id="discount_percent"
+                required
+              >
+                <option value="">Select Discount Percent</option>
+                <option value="10">10% - Rule 1 (1 day expiration)</option>
+                <option value="20">20% - Rule 2 (2 days expiration)</option>
+                <option value="30">30% - Rule 3 (3 days expiration)</option>
+                <option value="40">40% - Rule 4 (4 days expiration)</option>
+                <option value="50">50% - Rule 5 (7 days expiration)</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>&nbsp;</label>
+              <button type="submit">Save Discount</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Saved Discounts</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Product ID</th>
+              <th>Base Price</th>
+              <th>Discount</th>
+              <th>Discounted Price</th>
+              <th>Expires In</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="discountTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const productStorageKey = "pricing_products";
+      const discountStorageKey = "pricing_discounts";
+      const discountForm = document.getElementById("discountForm");
+      const productIdInput = document.getElementById("product_id");
+      const discountPercentInput = document.getElementById("discount_percent");
+      const discountTableBody = document.getElementById("discountTableBody");
+      const statusMessage = document.getElementById("statusMessage");
+      const productListId = "savedDiscountProductIds";
+
+      // Map discount percent to expiration hours
+      function getExpirationHours(discountPercent) {
+        const durationMap = {
+          "10": 24,      // Rule 1: 1 days
+          "20": 48,      // Rule 2: 2 days
+          "30": 72,      // Rule 3: 3 days
+          "40": 96,      // Rule 4: 4 days
+          "50": 168      // Rule 5: 7 days
+        };
+        return durationMap[String(discountPercent)] || 24;
+      }
+
+      // Get products from storage
+      function getProducts() {
+        const savedProducts = localStorage.getItem(productStorageKey);
+        return savedProducts ? JSON.parse(savedProducts) : [];
+      }
+
+      // Get discounts from storage
+      function getDiscounts() {
+        const savedDiscounts = localStorage.getItem(discountStorageKey);
+        return savedDiscounts ? JSON.parse(savedDiscounts) : [];
+      }
+
+      // Save discounts to storage
+      function saveDiscounts(discounts) {
+        localStorage.setItem(discountStorageKey, JSON.stringify(discounts));
+      }
+
+      // Format price with 2 decimal places
+      function formatPrice(price) {
+        return Number(price).toFixed(2);
+      }
+
+      // Show success or error message
+      function showMessage(message, type) {
+        statusMessage.textContent = message;
+        statusMessage.className = "message-list " + type;
+      }
+
+      // Convert hours to hh:mm:ss format
+      function formatTimeRemaining(hours) {
+        const totalSeconds = Math.round(hours * 3600);
+        
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+        
+        // Pad with zeros (e.g., "02:15:05")
+        const hh = String(h).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        const ss = String(s).padStart(2, '0');
+        
+        return hh + ":" + mm + ":" + ss;
+      }
+
+      // Calculate time remaining in hours
+      function getTimeRemaining(expirationTimestamp) {
+        const now = new Date().getTime();
+        const millisecondsRemaining = expirationTimestamp - now;
+        const hoursRemaining = millisecondsRemaining / (1000 * 60 * 60);
+        return hoursRemaining;
+      }
+
+      // Remove expired discounts from storage
+      function removeExpiredDiscounts() {
+        const discounts = getDiscounts();
+        const now = new Date().getTime();
+        
+        const validDiscounts = discounts.filter(discount => {
+          return discount.expiration_timestamp > now;
+        });
+        
+        if (validDiscounts.length < discounts.length) {
+          saveDiscounts(validDiscounts);
+          renderDiscounts();
+        }
+      }
+
+      // Show product ID suggestions
+      function renderProductOptions() {
+        const products = getProducts().slice().sort((a, b) => Number(a.id) - Number(b.id));
+        let datalist = document.getElementById(productListId);
+
+        if (!datalist) {
+          datalist = document.createElement("datalist");
+          datalist.id = productListId;
+          document.body.appendChild(datalist);
+        }
+
+        datalist.innerHTML = products.map((product) => `<option value="${product.id}"></option>`).join("");
+        productIdInput.setAttribute("list", productListId);
+      }
+
+      // Get all discount rows with formatted data
+      function getDiscountRows() {
+        const products = getProducts();
+        const discounts = getDiscounts();
+        const productMap = {};
+
+        products.forEach((product) => {
+          productMap[String(product.id)] = product;
+        });
+
+        return discounts
+          .map((discount) => {
+            const product = productMap[String(discount.product_id)];
+            if (!product) {
+              return null;
+            }
+
+            const basePrice = Number(product.base_price);
+            const percent = Number(discount.discount_percent);
+            const discountedPrice = basePrice - (basePrice * percent) / 100;
+            const timeRemaining = getTimeRemaining(discount.expiration_timestamp);
+
+            return {
+              product_id: discount.product_id,
+              discount_percent: percent,
+              base_price: basePrice,
+              discounted_price: discountedPrice < 0 ? 0 : discountedPrice,
+              created_at: discount.created_at,
+              expiration_timestamp: discount.expiration_timestamp,
+              time_remaining: timeRemaining,
+            };
+          })
+          .filter(Boolean);
+      }
+
+      // Draw discount table with countdown timers
+      function renderDiscounts() {
+        const rows = getDiscountRows();
+        discountTableBody.innerHTML = "";
+
+        if (rows.length === 0) {
+          discountTableBody.innerHTML = `
+            <tr>
+              <td colspan="6" class="empty-state">No discounts saved yet.</td>
+            </tr>
+          `;
+          return;
+        }
+
+        rows.forEach((item) => {
+          const row = document.createElement("tr");
+          
+          // Highlight if expiring soon (less than 1 hour)
+          if (item.time_remaining < 1) {
+            row.classList.add("expiring-soon");
+          }
+          
+          const timeText = item.time_remaining > 0 
+            ? formatTimeRemaining(item.time_remaining)
+            : "Expired";
+          
+          row.innerHTML = `
+            <td>${item.product_id}</td>
+            <td>₱ ${formatPrice(item.base_price)}</td>
+            <td>${item.discount_percent.toFixed(2)}%</td>
+            <td>₱ ${formatPrice(item.discounted_price)}</td>
+            <td class="countdown">${timeText}</td>
+            <td><button class="remove-btn" data-product-id="${item.product_id}">Remove</button></td>
+          `;
+          discountTableBody.appendChild(row);
+        });
+      }
+
+      // Delete a discount by product ID
+      function removeDiscount(productId) {
+        const discounts = getDiscounts().filter((item) => String(item.product_id) !== String(productId));
+        saveDiscounts(discounts);
+        renderDiscounts();
+        showMessage("Discount removed.", "success");
+      }
+
+      // Handle form submission
+      discountForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const productId = productIdInput.value.trim();
+        const discountPercent = Number(discountPercentInput.value);
+        const products = getProducts();
+        const product = products.find((item) => String(item.id) === productId);
+
+        // Validate inputs
+        if (!productId) {
+          showMessage("Product ID is required.", "error");
+          return;
+        }
+
+        if (!product) {
+          showMessage("Product ID does not exist.", "error");
+          return;
+        }
+
+        if (discountPercent <= 0 || discountPercent > 100) {
+          showMessage("Discount percent must be greater than 0 and at most 100.", "error");
+          return;
+        }
+
+        const basePrice = Number(product.base_price);
+        const discountedPrice = basePrice - (basePrice * discountPercent) / 100;
+
+        if (discountedPrice < 0) {
+          showMessage("Discounted price must not be negative.", "error");
+          return;
+        }
+
+        // Get expiration hours based on discount percent
+        const expirationHours = getExpirationHours(discountPercent);
+
+        // Calculate expiration time
+        const now = new Date();
+        const expirationTime = new Date(now.getTime() + expirationHours * 60 * 60 * 1000);
+        const expirationTimestamp = expirationTime.getTime();
+
+        const discounts = getDiscounts();
+        const existingIndex = discounts.findIndex((item) => String(item.product_id) === productId);
+        
+        // Create discount object with expiration
+        const discountData = {
+          product_id: productId,
+          discount_percent: discountPercent,
+          discounted_price: discountedPrice,
+          created_at: new Date().toLocaleString(),
+          expiration_timestamp: expirationTimestamp,
+        };
+
+        if (existingIndex >= 0) {
+          discounts[existingIndex] = discountData;
+          showMessage("Discount updated successfully.", "success");
+        } else {
+          discounts.push(discountData);
+          showMessage("Discount created successfully.", "success");
+        }
+
+        saveDiscounts(discounts);
+        renderDiscounts();
+        discountForm.reset();
+      });
+
+      // Handle remove button clicks
+      discountTableBody.addEventListener("click", function (event) {
+        if (event.target.classList.contains("remove-btn")) {
+          removeDiscount(event.target.getAttribute("data-product-id"));
+        }
+      });
+
+      // Update countdown timers every second
+      setInterval(function() {
+        removeExpiredDiscounts();
+        renderDiscounts();
+      }, 1000);
+
+      // Initial render
+      renderProductOptions();
+      renderDiscounts();
+    </script>
+  </body>
+</html>
