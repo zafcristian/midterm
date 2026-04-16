@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pricing Management</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background: #f4f6f9;
+      }
+
+      .sidebar {
+        width: 230px;
+        background: #2f3542;
+        color: white;
+        padding: 20px;
+      }
+
+      .sidebar h2 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 12px;
+        margin-bottom: 8px;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.2s;
+      }
+
+      .sidebar a:hover,
+      .sidebar a.active {
+        background: #57606f;
+      }
+
+      .main {
+        flex: 1;
+        padding: 30px;
+      }
+
+      .header {
+        margin-bottom: 25px;
+      }
+
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .field label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: #555;
+      }
+
+      .field input,
+      .field button {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+      }
+
+      .field button {
+        border: none;
+        background: #2f3542;
+        color: white;
+        cursor: pointer;
+      }
+
+      .search-row {
+        display: grid;
+        grid-template-columns: minmax(220px, 320px) 160px;
+        gap: 15px;
+        align-items: end;
+      }
+
+      table {
+        width: 100%;
+        margin-top: 15px;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      thead,
+      tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+
+      tbody {
+        display: block;
+        max-height: 320px;
+        overflow-y: auto;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: top;
+      }
+
+      .history-list {
+        list-style: none;
+      }
+
+      .history-list li {
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .empty-state {
+        color: #555;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <h2>User</h2>
+
+      <a href="{{ url_for('userdashboard') }}">Dashboard</a>
+      <a
+        href="{{ url_for('userdashboard_section', section='pricing') }}"
+        class="active"
+        >Pricing Management</a
+      >
+      <a href="{{ url_for('userdashboard_section', section='discount') }}"
+        >Discount Management</a
+      >
+      <a href="{{ url_for('userdashboard_section', section='settings') }}"
+        >Settings</a
+      >
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1>Pricing Management</h1>
+        <p>Welcome, {{ username }}</p>
+      </div>
+
+      <div class="card">
+        <h3>Search Product by ID</h3>
+        <div class="search-row">
+          <div class="field">
+            <label for="searchProductId">Product ID</label>
+            <input type="text" id="searchProductId" placeholder="Enter product ID" />
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button type="button" id="clearSearchBtn">Clear Search</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Product List and Base Price</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Product ID</th>
+              <th>Base Price</th>
+              <th>Price History</th>
+            </tr>
+          </thead>
+          <tbody id="pricingTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const storageKey = "pricing_products";
+      const pricingTableBody = document.getElementById("pricingTableBody");
+      const searchProductIdInput = document.getElementById("searchProductId");
+      const clearSearchBtn = document.getElementById("clearSearchBtn");
+
+      function getProducts() {
+        const savedProducts = localStorage.getItem(storageKey);
+        return savedProducts ? JSON.parse(savedProducts) : [];
+      }
+
+      function formatPrice(price) {
+        return Number(price).toFixed(2);
+      }
+
+      function renderProducts(filterId = "") {
+        const products = getProducts();
+        const filteredProducts = filterId
+          ? products.filter((product) =>
+              String(product.id).toLowerCase().includes(filterId.toLowerCase())
+            )
+          : products;
+
+        pricingTableBody.innerHTML = "";
+
+        if (filteredProducts.length === 0) {
+          pricingTableBody.innerHTML = `
+            <tr>
+              <td colspan="3" class="empty-state">No matching products found.</td>
+            </tr>
+          `;
+          return;
+        }
+
+        filteredProducts.forEach((product) => {
+          const historyItems = product.price_history
+            .slice()
+            .reverse()
+            .map((entry) => {
+              const priceText =
+                entry.old_price === null
+                  ? `Initial: ₱ ${formatPrice(entry.new_price)}`
+                  : `₱ ${formatPrice(entry.old_price)} to ₱ ${formatPrice(entry.new_price)}`;
+              return `<li>${priceText}<br /><small>${entry.timestamp}</small></li>`;
+            })
+            .join("");
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${product.id}</td>
+            <td>₱ ${formatPrice(product.base_price)}</td>
+            <td><ul class="history-list">${historyItems}</ul></td>
+          `;
+          pricingTableBody.appendChild(row);
+        });
+      }
+
+      searchProductIdInput.addEventListener("input", function () {
+        renderProducts(this.value.trim());
+      });
+
+      clearSearchBtn.addEventListener("click", function () {
+        searchProductIdInput.value = "";
+        renderProducts();
+      });
+
+      renderProducts();
+    </script>
+  </body>
+</html>
