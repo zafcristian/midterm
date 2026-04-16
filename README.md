@@ -4,7 +4,7 @@ GROUP 12 BSCS 1B
 2.PENIEL LANOY
 3.RONALD GOMEZ
 4.CRISTIAN ZAFRA
-
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 PROGRESSIVE REPORT: Start designing our admin dashboard, we added some features/function like add prod id, set product price, and view the list of added product, added sidebar overlay button.
 
