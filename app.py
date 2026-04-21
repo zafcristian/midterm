@@ -82,5 +82,8 @@ def login():
     return render_template('login.html', message='')
 
 
+application = app
+
+
 if __name__ == '__main__':
     app.run(debug=True)
