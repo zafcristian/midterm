@@ -1,10 +1,10 @@
-PRODUCT PRICING AND DISCOUNT MANAGEMENT SYSTEM
+        PRODUCT PRICING AND DISCOUNT MANAGEMENT SYSTEM
 GROUP 12 BSCS 1B
 1.CHARLES INSON
 2.PENIEL LANOY
 3.RONALD GOMEZ
 4.CRISTIAN ZAFRA
-
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 PROGRESSIVE REPORT: Start designing our admin dashboard, we added some features/function like add prod id, set product price, and view the list of added product, added sidebar overlay button.
 
@@ -22,6 +22,8 @@ and also we add sidebar overlay button to edit product and edit the price of the
 
 
 
+
+-------------------------------------------------------------------------------------------------------------
 
 
 PROGRESSIVE REPORT: Start making the module 2 our module 2 is discount management system
@@ -70,24 +72,17 @@ The discount table shows:
 - **⏱️ Expires In** (HH:MM:SS countdown)
 - Remove button
 
-# formatTimeRemaining(hours)
-Converts hours to HH:MM:SS format
-```javascript
-for ex.
-// Input: 2.25 (hours)
-// Output: "02:15:00"
-
-
- LocalStorage Keys
+LocalStorage Keys
 
 | Key | Purpose | Format |
-|-----|---------|--------|
-| `pricing_products` | All products | JSON array |
-| `pricing_discounts` | All discounts with expiration | JSON array |
+|---------------|-----------|-------------------|
+| pricing_product | All product | JSON array |
+| pricing_discounts | All discount with expiration  | JSON array |
 
 
-**localStorage:**
-- Browser's built-in storage (like a small database)
+Understanding the code:
+localStorage:
+- Browser's built in storage (like small data base)
 - Data stored as JSON strings
+- Persists across page reloads 
 
-        
