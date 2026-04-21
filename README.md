@@ -78,6 +78,12 @@ LocalStorage Keys
 |pricing_product| All product| JSON array|
 |pricing_discounts | All discount with expiration | JSON array|
 
+| Key | Purpose | Format |
+|---------------|-----------|-------------------|
+| pricing_product | All product | JSON array |
+| pricing_discounts | All discount with expiration  | JSON array |
+
+
 
 Understanding the code:
 localStorage:
