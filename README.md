@@ -1,4 +1,4 @@
-PRODUCT PRICING AND DISCOUNT MANAGEMENT SYSTEM
+        PRODUCT PRICING AND DISCOUNT MANAGEMENT SYSTEM
 GROUP 12 BSCS 1B
 1.CHARLES INSON
 2.PENIEL LANOY
@@ -72,24 +72,16 @@ The discount table shows:
 - **⏱️ Expires In** (HH:MM:SS countdown)
 - Remove button
 
-# formatTimeRemaining(hours)
-Converts hours to HH:MM:SS format
-```javascript
-for ex.
-// Input: 2.25 (hours)
-// Output: "02:15:00"
+LocalStorage Keys
+|Key            | Purpose     | Format |
+|----------------------------------------|
+|pricing_product| All product| JSON array|
+|pricing_discounts | All discount with expiration | JSON array|
 
 
- LocalStorage Keys
-
-| Key | Purpose | Format |
-|-----|---------|--------|
-| `pricing_products` | All products | JSON array |
-| `pricing_discounts` | All discounts with expiration | JSON array |
-
-
-**localStorage:**
-- Browser's built-in storage (like a small database)
+Understanding the code:
+localStorage:
+- Browser's built in storage (like small data base)
 - Data stored as JSON strings
+- Persists across page reloads 
 
-        
