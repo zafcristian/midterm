@@ -304,7 +304,8 @@ class FlaskAppWrapper:
                         template_map = {
                             'pricing': 'pricingdashboard.html',
                             'discount': 'discountdashboard.html',
-                            'settings': 'settingsdashboard.html'
+                            'settings': 'settingsdashboard.html',                           
+                            
                         }
                         return render_template(
                             template_map.get(section, 'userdashboard.html'),
@@ -363,6 +364,6 @@ flask_app_wrapper = FlaskAppWrapper(__name__)
 application = flask_app_wrapper.get_wsgi_app()
 app = application  # Also expose as 'app' for compatibility
 
-# ============= RUN THE APPLICATION =============
+
 if __name__ == '__main__':
     flask_app_wrapper.run(debug=True)
