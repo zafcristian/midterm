@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Settings | Account Management</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1e2a3a, #0f1724);
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        width: 260px;
+        background: rgba(15, 23, 36, 0.95);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 25px 20px;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .sidebar h2 {
+        text-align: center;
+        margin-bottom: 35px;
+        font-size: 24px;
+        font-weight: 600;
+        color: #ff6b6b;
+      }
+
+      .sidebar a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        color: #cbd5e1;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        transform: translateX(5px);
+      }
+
+      .sidebar a.active {
+        background: #ff6b6b;
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+      }
+
+      /* Main Content */
+      .main {
+        flex: 1;
+        padding: 30px 40px;
+        overflow-y: auto;
+      }
+
+      /* Header */
+      .header {
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 32px;
+        color: white;
+        margin-bottom: 8px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 16px;
+      }
+
+      /* Stats Bar */
+      .stats-bar {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .stat-chip {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 10px 20px;
+        border-radius: 30px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* Settings Container */
+      .settings-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 25px;
+      }
+
+      /* Settings Card */
+      .settings-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .settings-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .card-header i {
+        font-size: 28px;
+      }
+
+      .card-header h3 {
+        font-size: 20px;
+        color: #333;
+      }
+
+      .card-header .badge {
+        margin-left: auto;
+        background: #ff6b6b;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+      }
+
+      /* Profile Avatar */
+      .profile-avatar {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .avatar-circle {
+        width: 70px;
+        height: 70px;
+        background: #ff6b6b;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: white;
+      }
+
+      .avatar-info h4 {
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .avatar-info p {
+        color: #666;
+        font-size: 12px;
+      }
+
+      /* Form Styles */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #555;
+        font-size: 14px;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+      }
+
+      /* Button Styles */
+      .btn-primary {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+
+      .btn-primary:hover {
+        background: #ee5a24;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1px solid #ff6b6b;
+        color: #ff6b6b;
+        padding: 8px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-outline:hover {
+        background: #ff6b6b;
+        color: white;
+      }
+
+      .btn-icon {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 5px;
+        color: #ff6b6b;
+      }
+
+      /* Info Row */
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .info-value {
+        font-weight: 600;
+        color: #333;
+      }
+
+      .badge-user {
+        background: #27ae60;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        display: inline-block;
+      }
+
+      /* Theme Switcher */
+      .theme-options {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+      }
+
+      .theme-option {
+        flex: 1;
+        text-align: center;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .theme-option:hover {
+        border-color: #ff6b6b;
+        transform: translateY(-2px);
+      }
+
+      .theme-option.active {
+        border-color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.05);
+      }
+
+      .theme-option i {
+        font-size: 30px;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      /* Toast Notification */
+      .toast-notification {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #27ae60;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        display: none;
+        animation: slideIn 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .settings-container {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          width: 200px;
+        }
+        .main {
+          padding: 20px;
+        }
+        .stats-bar {
+          flex-wrap: wrap;
+        }
+        .profile-avatar {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <h2>👤 User</h2>
+
+      <a href="{{ url_for('userdashboard') }}">📊 Dashboard</a>
+      <a href="{{ url_for('userdashboard_section', section='pricing') }}">💰 Pricing Management</a>
+      <a href="{{ url_for('userdashboard_section', section='discount') }}">🏷️ Discount Management</a>
+      <a href="{{ url_for('userdashboard_section', section='settings') }}" class="active">⚙️ Settings</a>
+      <a href="{{ url_for('logout') }}">🚪 Logout</a>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1>⚙️ Account Settings</h1>
+        <p>Manage your profile, security, and appearance preferences</p>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-chip">👋 Welcome, {{ username }}!</div>
+        <div class="stat-chip">⭐ {{ role|title }} Account</div>
+        <div class="stat-chip" id="sessionTime">🟢 Session Active</div>
+      </div>
+
+      <div class="settings-container">
+        <!-- Profile Settings Card -->
+        <div class="settings-card">
+          <div class="card-header">
+            👤
+            <h3>Profile Information</h3>
+            <div class="badge">{{ role|title }}</div>
+          </div>
+          
+          <div class="profile-avatar">
+            <div class="avatar-circle" id="avatarInitial">
+              {{ username[0]|upper if username else 'U' }}
+            </div>
+            <div class="avatar-info">
+              <h4>{{ username }}</h4>
+              <p>{{ role|title }} Account • Member since <span id="memberSinceShort"></span></p>
+              <button class="btn-outline" onclick="changeAvatar()" style="margin-top: 8px;">Change Avatar</button>
+            </div>
+          </div>
+          
+          <div class="info-row">
+            <span class="info-label">Username</span>
+            <span class="info-value" id="displayUsername">{{ username }}</span>
+            <button class="btn-icon" onclick="editUsername()">✏️</button>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email Address</span>
+            <span class="info-value" id="displayEmail">{{ username }}@example.com</span>
+            <button class="btn-icon" onclick="editEmail()">✏️</button>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Account Type</span>
+            <span class="info-value"><span class="badge-user">{{ role|title }}</span></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Member Since</span>
+            <span class="info-value" id="memberSince">Loading...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Last Login</span>
+            <span class="info-value" id="lastLogin">Just now</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Account Status</span>
+            <span class="info-value" style="color: #27ae60;">✓ Active</span>
+          </div>
+        </div>
+
+        <!-- Change Password Card -->
+        <div class="settings-card">
+          <div class="card-header">
+            🔒
+            <h3>Change Password</h3>
+          </div>
+          
+          <form id="changePasswordForm">
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" id="currentPassword" placeholder="Enter current password" required>
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="newPassword" placeholder="Enter new password" required>
+              <small style="color: #999;">Minimum 8 characters</small>
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="confirmPassword" placeholder="Confirm new password" required>
+            </div>
+            <button type="submit" class="btn-primary">🔐 Update Password</button>
+          </form>
+        </div>
+
+        <!-- Appearance Card -->
+        <div class="settings-card">
+          <div class="card-header">
+            🎨
+            <h3>Appearance</h3>
+          </div>
+          
+          <div class="form-group">
+            <label>Theme Preference</label>
+            <div class="theme-options">
+              <div class="theme-option" data-theme="light">
+                ☀️
+                Light
+              </div>
+              <div class="theme-option" data-theme="dark">
+                🌙
+                Dark
+              </div>
+              <div class="theme-option" data-theme="auto">
+                ⚡
+                Auto
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>🌐 Language</label>
+            <select id="languageSelect">
+              <option value="en">English</option>
+              <option value="fil">Filipino</option>
+              <option value="ceb">Cebuano</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>🔔 Notifications</label>
+            <select id="notificationSelect">
+              <option value="all">All notifications</option>
+              <option value="important">Important only</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+          
+          <button class="btn-primary" onclick="savePreferences()">💾 Save Preferences</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Edit -->
+    <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center;">
+      <div style="background: white; border-radius: 20px; padding: 25px; width: 350px;">
+        <h3 id="modalTitle">Edit</h3>
+        <input type="text" id="modalInput" style="width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="display: flex; gap: 10px;">
+          <button onclick="saveEdit()" class="btn-primary">Save</button>
+          <button onclick="closeModal()" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toastNotification">
+      <span id="toastMessage"></span>
+    </div>
+
+    <script>
+      let editCallback = null;
+      
+      function showToast(message, type) {
+        const toast = document.getElementById('toastNotification');
+        const toastMsg = document.getElementById('toastMessage');
+        toastMsg.textContent = message;
+        toast.style.background = type === 'success' ? '#27ae60' : '#dc2626';
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+      }
+      
+      function openModal(title, value, callback) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalInput').value = value;
+        editCallback = callback;
+        document.getElementById('editModal').style.display = 'flex';
+      }
+      
+      function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+        editCallback = null;
+      }
+      
+      function saveEdit() {
+        if (editCallback) {
+          editCallback(document.getElementById('modalInput').value);
+        }
+        closeModal();
+      }
+      
+      function editUsername() {
+        openModal('Edit Username', document.getElementById('displayUsername').innerText, (newValue) => {
+          if (newValue.trim()) {
+            document.getElementById('displayUsername').innerText = newValue;
+            document.getElementById('avatarInitial').innerHTML = newValue[0].toUpperCase();
+            showToast('Username updated successfully!', 'success');
+          }
+        });
+      }
+      
+      function editEmail() {
+        openModal('Edit Email', document.getElementById('displayEmail').innerText, (newValue) => {
+          if (newValue.trim() && newValue.includes('@')) {
+            document.getElementById('displayEmail').innerText = newValue;
+            showToast('Email updated successfully!', 'success');
+          } else {
+            showToast('Please enter a valid email address', 'error');
+          }
+        });
+      }
+      
+      function changeAvatar() {
+        const colors = ['#ff6b6b', '#27ae60', '#e74c3c', '#f39c12', '#3498db'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        document.querySelector('.avatar-circle').style.background = randomColor;
+        showToast('Avatar color changed!', 'success');
+      }
+      
+      function loadPreferences() {
+        const theme = localStorage.getItem('userTheme') || 'light';
+        const language = localStorage.getItem('userLanguage') || 'en';
+        const notifications = localStorage.getItem('userNotifications') || 'all';
+        
+        document.querySelectorAll('.theme-option').forEach(opt => {
+          opt.classList.remove('active');
+          if (opt.dataset.theme === theme) opt.classList.add('active');
+        });
+        
+        document.getElementById('languageSelect').value = language;
+        document.getElementById('notificationSelect').value = notifications;
+        
+        applyTheme(theme);
+      }
+      
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          document.body.style.background = 'linear-gradient(135deg, #1a1a2e, #16213e)';
+        } else {
+          document.body.style.background = 'linear-gradient(135deg, #1e2a3a, #0f1724)';
+        }
+      }
+      
+      document.querySelectorAll('.theme-option').forEach(option => {
+        option.addEventListener('click', function() {
+          const theme = this.dataset.theme;
+          localStorage.setItem('userTheme', theme);
+          loadPreferences();
+          showToast('Theme changed to ' + theme + ' mode!', 'success');
+        });
+      });
+      
+      document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const currentPass = document.getElementById('currentPassword').value;
+        const newPass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmPassword').value;
+        
+        if (!currentPass) { showToast('Please enter current password', 'error'); return; }
+        if (newPass !== confirmPass) { showToast('New passwords do not match!', 'error'); return; }
+        if (newPass.length < 8) { showToast('Password must be at least 8 characters!', 'error'); return; }
+        
+        showToast('Password updated successfully!', 'success');
+        document.getElementById('changePasswordForm').reset();
+      });
+      
+      function savePreferences() {
+        const language = document.getElementById('languageSelect').value;
+        const notifications = document.getElementById('notificationSelect').value;
+        
+        localStorage.setItem('userLanguage', language);
+        localStorage.setItem('userNotifications', notifications);
+        
+        showToast('Preferences saved successfully!', 'success');
+      }
+      
+      // Set dates
+      const memberDate = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('memberSince').innerText = memberDate;
+      document.getElementById('memberSinceShort').innerText = new Date().getFullYear();
+      
+      const lastLogin = localStorage.getItem('lastLogin');
+      if (lastLogin) document.getElementById('lastLogin').innerText = lastLogin;
+      else {
+        const now = new Date().toLocaleString();
+        document.getElementById('lastLogin').innerText = now;
+        localStorage.setItem('lastLogin', now);
+      }
+      
+      function updateSessionTime() {
+        document.getElementById('sessionTime').innerHTML = `🟢 Session Active (${new Date().toLocaleTimeString()})`;
+      }
+      updateSessionTime();
+      setInterval(updateSessionTime, 1000);
+      
+      loadPreferences();
+    </script>
+  </body>
+</html>

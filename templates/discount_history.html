@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discount History</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: #f4f6f9;
+        }
+
+        .sidebar {
+            width: 230px;
+            background: #1e2a3a;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffffff;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            margin-bottom: 8px;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: #556373;
+        }
+
+        .main {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #1e2a3a;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            color: #1e2a3a;
+        }
+
+        .tab-btn.active {
+            color: #1e2a3a;
+            border-bottom: 3px solid #1e2a3a;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .transaction-table {
+            background: white;
+            border-radius: 10px;
+            overflow-x: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #1e2a3a;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background: #1e2a3a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-bar button:hover {
+            background: #556373;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 16px;
+        }
+
+        .discount-badge {
+            background: #27ae60;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .action-created {
+            background: #27ae60;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .action-updated {
+            background: #f39c12;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .action-removed {
+            background: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin</h2>
+        <a href="{{ url_for('admindashboard') }}">Dashboard</a>
+        <a href="{{ url_for('adminproductmanagement') }}">Product Management</a>
+        <a href="{{ url_for('admindiscountmanagement') }}">Discount Management</a>
+        <a href="{{ url_for('discount_history') }}" class="active">Discount History</a>
+        <a href="{{ url_for('adminsettings') }}">Settings</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h1>📋 Discount History</h1>
+            <p>Welcome, {{ username }}</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('transactions')">💰 Customer Transactions</button>
+            <button class="tab-btn" onclick="switchTab('creations')">📝 Discount Creation Logs</button>
+        </div>
+
+        <!-- Tab 1: Customer Transactions -->
+        <div id="transactions-tab" class="tab-content active">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Search..." onkeyup="filterTable()">
+                <button onclick="resetSearch()">Reset</button>
+            </div>
+
+            <div class="transaction-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Transaction ID</th>
+                            <th>Customer Name</th>
+                            <th>Discount Code</th>
+                            <th>Discount %</th>
+                            <th>Original Amount</th>
+                            <th>Final Amount</th>
+                            <th>Saved</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                        {% if history %}
+                            {% for transaction in history %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ transaction.date }}</td>
+                                <td>{{ transaction.time }}</td>
+                                <td><strong>{{ transaction.transaction_id }}</strong></td>
+                                <td>{{ transaction.customer_name or 'Guest' }}</td>
+                                <td>
+                                    {% if transaction.discount_code %}
+                                        <span class="discount-badge">{{ transaction.discount_code }}</span>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>{{ transaction.discount_percentage }}%</td>
+                                <td>₱{{ '%.2f'|format(transaction.original_amount) }}</td>
+                                <td>₱{{ '%.2f'|format(transaction.discounted_amount) }}</td>
+                                <td style="color: green;">₱{{ '%.2f'|format(transaction.saved_amount) }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" class="no-data">📭 No transactions yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab 2: Discount Creation Logs -->
+        <div id="creations-tab" class="tab-content">
+            <div class="search-bar">
+                <input type="text" id="creationSearchInput" placeholder="🔍 Search by Product ID..." onkeyup="filterCreationTable()">
+                <button onclick="resetCreationSearch()">Reset</button>
+            </div>
+
+            <div class="transaction-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                            <th>Product ID</th>
+                            <th>Discount %</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="creationTableBody">
+                        {% if creation_history %}
+                            {% for log in creation_history %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ log.date }}</td>
+                                <td>{{ log.time }}</td>
+                                <td>
+                                    {% if log.action == 'created' %}
+                                        <span class="action-created">✓ Created</span>
+                                    {% elif log.action == 'updated' %}
+                                        <span class="action-updated">✎ Updated</span>
+                                    {% elif log.action == 'removed' %}
+                                        <span class="action-removed">✗ Removed</span>
+                                    {% else %}
+                                        {{ log.action }}
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ log.product_id }}</strong></td>
+                                <td>{{ log.discount_percent }}%</td>
+                                <td>{{ log.start_date|replace('T', ' ') if log.start_date else 'N/A' }}</td>
+                                <td>{{ log.end_date|replace('T', ' ') if log.end_date else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="no-data">📭 No discount creation logs yet. Create/Update/Remove a discount in Discount Management.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.getElementById('transactions-tab').classList.remove('active');
+            document.getElementById('creations-tab').classList.remove('active');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (tabName === 'transactions') {
+                document.getElementById('transactions-tab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            } else {
+                document.getElementById('creations-tab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            }
+        }
+
+        function filterTable() {
+            let searchInput = document.getElementById('searchInput').value.toLowerCase();
+            let rows = document.getElementById('transactionTableBody').getElementsByTagName('tr');
+            
+            for (let row of rows) {
+                if (!row.cells.length) continue;
+                
+                let transactionId = row.cells[3]?.innerText.toLowerCase() || '';
+                let customerName = row.cells[4]?.innerText.toLowerCase() || '';
+                
+                let matchesSearch = transactionId.includes(searchInput) || customerName.includes(searchInput);
+                row.style.display = matchesSearch ? '' : 'none';
+            }
+        }
+        
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            filterTable();
+        }
+
+        function filterCreationTable() {
+            let searchInput = document.getElementById('creationSearchInput').value.toLowerCase();
+            let rows = document.getElementById('creationTableBody').getElementsByTagName('tr');
+            
+            for (let row of rows) {
+                if (!row.cells.length) continue;
+                
+                let productId = row.cells[4]?.innerText.toLowerCase() || '';
+                let action = row.cells[3]?.innerText.toLowerCase() || '';
+                
+                let matchesSearch = productId.includes(searchInput) || action.includes(searchInput);
+                row.style.display = matchesSearch ? '' : 'none';
+            }
+        }
+        
+        function resetCreationSearch() {
+            document.getElementById('creationSearchInput').value = '';
+            filterCreationTable();
+        }
+    </script>
+</body>
+</html>

@@ -3,190 +3,424 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pricing Management</title>
+    <title>Pricing Management | User Dashboard</title>
 
     <style>
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
 
       body {
         display: flex;
         min-height: 100vh;
-        background: #f4f6f9;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       }
 
+      /* Sidebar Styles */
       .sidebar {
-        width: 230px;
-        background: #2f3542;
+        width: 260px;
+        background: rgba(30, 30, 47, 0.95);
+        backdrop-filter: blur(10px);
         color: white;
-        padding: 20px;
+        padding: 25px 20px;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
       }
 
       .sidebar h2 {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 35px;
+        font-size: 24px;
+        font-weight: 600;
+        background: linear-gradient(135deg, #fff, #a8c0ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
       }
 
       .sidebar a {
-        display: block;
-        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
         margin-bottom: 8px;
-        color: white;
+        color: #e0e0e0;
         text-decoration: none;
-        border-radius: 6px;
-        transition: background 0.2s;
+        border-radius: 10px;
+        transition: all 0.3s ease;
       }
 
-      .sidebar a:hover,
+      .sidebar a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        transform: translateX(5px);
+      }
+
       .sidebar a.active {
-        background: #57606f;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
       }
 
+      /* Main Content */
       .main {
         flex: 1;
-        padding: 30px;
+        padding: 30px 40px;
+        overflow-y: auto;
       }
 
+      /* Header */
       .header {
-        margin-bottom: 25px;
+        margin-bottom: 30px;
       }
 
+      .header h1 {
+        font-size: 32px;
+        color: white;
+        margin-bottom: 8px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .header p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 16px;
+      }
+
+      /* Stats Bar */
+      .stats-bar {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .stat-chip {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 12px 24px;
+        border-radius: 30px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .stat-chip span:first-child {
+        font-size: 24px;
+      }
+
+      .stat-chip .stat-number {
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      /* Cards */
       .card {
         background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-3px);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
       }
 
-      .field label {
-        display: block;
-        font-size: 14px;
-        margin-bottom: 6px;
-        color: #555;
+      .card-header i {
+        font-size: 28px;
+        color: #667eea;
       }
 
-      .field input,
-      .field button {
-        width: 100%;
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #cbd5e1;
+      .card-header h3 {
+        font-size: 20px;
+        color: #333;
       }
 
-      .field button {
-        border: none;
-        background: #2f3542;
+      .card-header .badge {
+        margin-left: auto;
+        background: #27ae60;
         color: white;
-        cursor: pointer;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
       }
 
-      .search-row {
-        display: grid;
-        grid-template-columns: minmax(220px, 320px) 160px;
+      /* Search Bar */
+      .search-container {
+        display: flex;
         gap: 15px;
-        align-items: end;
+        align-items: flex-end;
+        flex-wrap: wrap;
+      }
+
+      .search-field {
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .search-field label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #555;
+        font-size: 14px;
+      }
+
+      .search-field input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      .search-field input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .btn-clear {
+        background: #e0e0e0;
+        color: #555;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-clear:hover {
+        background: #c0c0c0;
+        transform: translateY(-2px);
+      }
+
+      /* Table Styles */
+      .table-container {
+        overflow-x: auto;
+        border-radius: 12px;
       }
 
       table {
         width: 100%;
-        margin-top: 15px;
         border-collapse: collapse;
-        table-layout: fixed;
       }
 
-      thead,
-      tbody tr {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-      }
-
-      tbody {
-        display: block;
-        max-height: 320px;
-        overflow-y: auto;
-      }
-
-      th,
-      td {
-        padding: 12px;
+      th, td {
+        padding: 14px 12px;
         text-align: left;
-        border-bottom: 1px solid #e2e8f0;
-        vertical-align: top;
+        border-bottom: 1px solid #f0f0f0;
       }
 
-      .history-list {
-        list-style: none;
-      }
-
-      .history-list li {
-        margin-bottom: 8px;
+      th {
+        background: #f8f9fa;
+        color: #555;
+        font-weight: 600;
         font-size: 13px;
       }
 
+      td {
+        font-size: 14px;
+        color: #333;
+      }
+
+      tbody tr {
+        transition: background 0.2s;
+      }
+
+      tbody tr:hover {
+        background: #f8f9fa;
+      }
+
+      .product-id {
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      .product-price {
+        font-weight: 600;
+        color: #27ae60;
+        font-size: 16px;
+      }
+
+      /* History List */
+      .history-list {
+        list-style: none;
+        font-size: 12px;
+      }
+
+      .history-list li {
+        padding: 6px 0;
+        color: #666;
+        border-bottom: 1px dashed #eee;
+      }
+
+      .history-list li:last-child {
+        border-bottom: none;
+      }
+
+      .history-list small {
+        color: #999;
+        font-size: 10px;
+      }
+
+      .history-badge {
+        display: inline-block;
+        background: #e8e8e8;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        margin-left: 8px;
+      }
+
+      /* Empty State */
       .empty-state {
-        color: #555;
+        text-align: center;
+        padding: 40px;
+        color: #999;
+      }
+
+      /* Toast Notification */
+      .toast-notification {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #27ae60;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        display: none;
+        animation: slideIn 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 200px;
+        }
+        .main {
+          padding: 20px;
+        }
+        .search-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .btn-clear {
+          width: 100%;
+        }
       }
     </style>
   </head>
 
   <body>
     <div class="sidebar">
-      <h2>User</h2>
+      <h2>👤 User</h2>
 
-      <a href="{{ url_for('userdashboard') }}">Dashboard</a>
-      <a
-        href="{{ url_for('userdashboard_section', section='pricing') }}"
-        class="active"
-        >Pricing Management</a
-      >
-      <a href="{{ url_for('userdashboard_section', section='discount') }}"
-        >Discount Management</a
-      >
-      <a href="{{ url_for('userdashboard_section', section='settings') }}"
-        >Settings</a
-      >
-      <a href="{{ url_for('logout') }}">Logout</a>
+      <a href="{{ url_for('userdashboard') }}">📊 Dashboard</a>
+      <a href="{{ url_for('userdashboard_section', section='pricing') }}" class="active">💰 Pricing Management</a>
+      <a href="{{ url_for('userdashboard_section', section='discount') }}">🏷️ Discount Management</a>
+      <a href="{{ url_for('userdashboard_section', section='settings') }}">⚙️ Settings</a>
+      <a href="{{ url_for('logout') }}">🚪 Logout</a>
     </div>
 
     <div class="main">
       <div class="header">
-        <h1>Pricing Management</h1>
-        <p>Welcome, {{ username }}</p>
+        <h1>💰 Pricing Management</h1>
+        <p>View product prices and track price history</p>
       </div>
 
-      <div class="card">
-        <h3>Search Product by ID</h3>
-        <div class="search-row">
-          <div class="field">
-            <label for="searchProductId">Product ID</label>
-            <input type="text" id="searchProductId" placeholder="Enter product ID" />
-          </div>
-          <div class="field">
-            <label>&nbsp;</label>
-            <button type="button" id="clearSearchBtn">Clear Search</button>
-          </div>
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-chip">
+          <span>📦</span>
+          <span>Total Products: <span class="stat-number" id="totalProducts">0</span></span>
+        </div>
+        <div class="stat-chip">
+          <span>💰</span>
+          <span>Average Price: <span class="stat-number" id="avgPrice">₱0</span></span>
+        </div>
+        <div class="stat-chip">
+          <span>📊</span>
+          <span>Price Changes: <span class="stat-number" id="totalChanges">0</span></span>
         </div>
       </div>
 
+      <!-- Search Card -->
       <div class="card">
-        <h3>Product List and Base Price</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Product ID</th>
-              <th>Base Price</th>
-              <th>Price History</th>
-            </tr>
-          </thead>
-          <tbody id="pricingTableBody"></tbody>
-        </table>
+        <div class="card-header">
+          🔍
+          <h3>Search Products</h3>
+          <div class="badge">Filter</div>
+        </div>
+        
+        <div class="search-container">
+          <div class="search-field">
+            <label>🔎 Search by Product ID</label>
+            <input type="text" id="searchProductId" placeholder="Enter product ID..." />
+          </div>
+          <button type="button" id="clearSearchBtn" class="btn-clear">🧹 Clear Search</button>
+        </div>
       </div>
+
+      <!-- Products List Card -->
+      <div class="card">
+        <div class="card-header">
+          📋
+          <h3>Product List</h3>
+          <div class="badge" id="productCount">0 items</div>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">Product ID</th>
+                <th style="width: 25%;">Current Price</th>
+                <th style="width: 50%;">Price History</th>
+              </tr>
+            </thead>
+            <tbody id="pricingTableBody">
+              <tr>
+                <td colspan="3" class="empty-state">📭 Loading products...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toastNotification">
+      <span id="toastMessage"></span>
     </div>
 
     <script>
@@ -195,13 +429,36 @@
       const searchProductIdInput = document.getElementById("searchProductId");
       const clearSearchBtn = document.getElementById("clearSearchBtn");
 
+      function showToast(message, type) {
+        const toast = document.getElementById('toastNotification');
+        const toastMsg = document.getElementById('toastMessage');
+        toastMsg.textContent = message;
+        toast.style.background = type === 'success' ? '#27ae60' : '#667eea';
+        toast.style.display = 'block';
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 3000);
+      }
+
       function getProducts() {
         const savedProducts = localStorage.getItem(storageKey);
         return savedProducts ? JSON.parse(savedProducts) : [];
       }
 
       function formatPrice(price) {
-        return Number(price).toFixed(2);
+        return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(price);
+      }
+
+      function updateStats() {
+        const products = getProducts();
+        const total = products.length;
+        const avgPrice = total > 0 ? products.reduce((sum, p) => sum + p.base_price, 0) / total : 0;
+        const totalChanges = products.reduce((sum, p) => sum + (p.price_history?.length || 0), 0);
+        
+        document.getElementById('totalProducts').innerText = total;
+        document.getElementById('avgPrice').innerHTML = formatPrice(avgPrice);
+        document.getElementById('totalChanges').innerText = totalChanges;
+        document.getElementById('productCount').innerText = total + ' item' + (total !== 1 ? 's' : '');
       }
 
       function renderProducts(filterId = "") {
@@ -217,45 +474,94 @@
         if (filteredProducts.length === 0) {
           pricingTableBody.innerHTML = `
             <tr>
-              <td colspan="3" class="empty-state">No matching products found.</td>
+              <td colspan="3" class="empty-state">📭 No products found.${filterId ? ' Try a different search term.' : ''}</td>
             </tr>
           `;
           return;
         }
 
         filteredProducts.forEach((product) => {
-          const historyItems = product.price_history
-            .slice()
-            .reverse()
-            .map((entry) => {
-              const priceText =
-                entry.old_price === null
-                  ? `Initial: ₱ ${formatPrice(entry.new_price)}`
-                  : `₱ ${formatPrice(entry.old_price)} to ₱ ${formatPrice(entry.new_price)}`;
-              return `<li>${priceText}<br /><small>${entry.timestamp}</small></li>`;
-            })
-            .join("");
+          const historyCount = product.price_history?.length || 0;
+          const lastChange = product.price_history?.length > 0 
+            ? product.price_history[product.price_history.length - 1]
+            : null;
+          
+          let historyHtml = '';
+          
+          if (historyCount === 0) {
+            historyHtml = '<li><span style="color: #999;">No price changes recorded</span></li>';
+          } else {
+            // Show last 3 price changes
+            const recentHistory = [...(product.price_history || [])].reverse().slice(0, 3);
+            historyHtml = recentHistory.map((entry) => {
+              const priceText = entry.old_price === null
+                ? `✨ Initial: ${formatPrice(entry.new_price)}`
+                : `📉 ${formatPrice(entry.old_price)} → ${formatPrice(entry.new_price)}`;
+              const date = new Date(entry.timestamp).toLocaleDateString();
+              const time = new Date(entry.timestamp).toLocaleTimeString();
+              return `
+                <li>
+                  ${priceText}
+                  <br />
+                  <small>📅 ${date} at ${time}</small>
+                </li>
+              `;
+            }).join('');
+            
+            if (historyCount > 3) {
+              historyHtml += `<li><span class="history-badge">+${historyCount - 3} more changes</span></li>`;
+            }
+          }
 
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${product.id}</td>
-            <td>₱ ${formatPrice(product.base_price)}</td>
-            <td><ul class="history-list">${historyItems}</ul></td>
+            <td class="product-id">#${escapeHtml(product.id)}</td>
+            <td class="product-price">${formatPrice(product.base_price)}</td>
+            <td>
+              <ul class="history-list">
+                ${historyHtml}
+              </ul>
+            </td>
           `;
           pricingTableBody.appendChild(row);
         });
+        
+        // Update showing count
+        const showingText = filterId ? `Showing ${filteredProducts.length} of ${products.length} products` : `${filteredProducts.length} products`;
+        document.getElementById('productCount').innerHTML = showingText;
       }
 
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Search functionality
       searchProductIdInput.addEventListener("input", function () {
-        renderProducts(this.value.trim());
+        const searchTerm = this.value.trim();
+        renderProducts(searchTerm);
+        
+        if (searchTerm) {
+          showToast(`Searching for "${searchTerm}"...`, 'success');
+        }
       });
 
       clearSearchBtn.addEventListener("click", function () {
         searchProductIdInput.value = "";
         renderProducts();
+        showToast("Search cleared. Showing all products.", 'success');
       });
 
+      // Initial render
       renderProducts();
+      updateStats();
+      
+      // Auto-refresh stats every 30 seconds
+      setInterval(() => {
+        updateStats();
+        renderProducts(searchProductIdInput.value.trim());
+      }, 30000);
     </script>
   </body>
 </html>

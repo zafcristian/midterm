@@ -1,0 +1,14 @@
+[
+    {
+        "id": "20260428135231956883",
+        "action": "created",
+        "product_id": "CELLPHONE1122",
+        "discount_percent": 20,
+        "start_date": "2026-04-22T13:52",
+        "end_date": "2026-04-30T13:52",
+        "timestamp": "2026-04-28T13:52:31.957165",
+        "date": "2026-04-28",
+        "time": "13:52:31",
+        "admin": "gwapo@bisu.edu.ph"
+    }
+]

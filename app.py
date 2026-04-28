@@ -1,5 +1,159 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, jsonify
 from abc import ABC, abstractmethod
+import json
+import os
+from datetime import datetime
+
+# ============= DISCOUNT HISTORY MANAGER (Transaction History) =============
+DISCOUNT_HISTORY_FILE = 'discount_history.json'
+
+def load_discount_history():
+    """Load discount history from file"""
+    if os.path.exists(DISCOUNT_HISTORY_FILE):
+        try:
+            with open(DISCOUNT_HISTORY_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return []
+    return []
+
+def save_discount_transaction(transaction_data):
+    """Save a discount transaction with date and time"""
+    history = load_discount_history()
+    
+    transaction_data['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    transaction_data['date'] = datetime.now().strftime('%Y-%m-%d')
+    transaction_data['time'] = datetime.now().strftime('%H:%M:%S')
+    
+    history.append(transaction_data)
+    
+    with open(DISCOUNT_HISTORY_FILE, 'w') as f:
+        json.dump(history, f, indent=4)
+    
+    return True
+
+def get_discount_history():
+    """Get all discount history"""
+    return load_discount_history()
+
+def get_discount_summary():
+    """Get summary statistics from discount history"""
+    history = load_discount_history()
+    
+    if not history:
+        return {
+            'total_transactions': 0,
+            'total_saved': 0,
+            'avg_discount': 0
+        }
+    
+    total_saved = sum(t.get('saved_amount', 0) for t in history)
+    total_discount_percent = sum(t.get('discount_percentage', 0) for t in history)
+    
+    return {
+        'total_transactions': len(history),
+        'total_saved': total_saved,
+        'avg_discount': total_discount_percent / len(history) if history else 0
+    }
+
+
+# ============= DISCOUNT CREATION HISTORY MANAGER (ENCAPSULATED CLASS) =============
+class DiscountCreationHistoryManager:
+    """Manages discount creation/update/removal history - demonstrates encapsulation"""
+    
+    def __init__(self, history_file='discount_creation_history.json'):
+        """Constructor initializes the history file path"""
+        self._history_file = history_file
+        self._initialize_history_file()
+    
+    def _initialize_history_file(self):
+        """Private method to ensure history file exists"""
+        if not os.path.exists(self._history_file):
+            with open(self._history_file, 'w') as f:
+                json.dump([], f)
+    
+    def _load_history(self):
+        """Private method to load history from file"""
+        if os.path.exists(self._history_file):
+            try:
+                with open(self._history_file, 'r') as f:
+                    return json.load(f)
+            except:
+                return []
+        return []
+    
+    def _save_history(self, history):
+        """Private method to save history to file"""
+        with open(self._history_file, 'w') as f:
+            json.dump(history, f, indent=4)
+    
+    # ============= PUBLIC METHODS =============
+    def log_discount_action(self, action, product_id, discount_percent, start_date, end_date, admin_email):
+        """
+        Log a discount creation/update/removal action
+        action: 'created', 'updated', or 'removed'
+        """
+        history = self._load_history()
+        
+        entry = {
+            'id': datetime.now().strftime('%Y%m%d%H%M%S%f'),
+            'action': action,
+            'product_id': product_id,
+            'discount_percent': discount_percent,
+            'start_date': start_date,
+            'end_date': end_date,
+            'timestamp': datetime.now().isoformat(),
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'time': datetime.now().strftime('%H:%M:%S'),
+            'admin': admin_email
+        }
+        
+        history.append(entry)
+        self._save_history(history)
+        return True
+    
+    def get_all_history(self):
+        """Get all discount creation history"""
+        history = self._load_history()
+        history.reverse()  # Latest first
+        return history
+    
+    def get_history_by_product(self, product_id):
+        """Get history for specific product"""
+        history = self._load_history()
+        return [h for h in history if h['product_id'] == product_id]
+    
+    def get_history_by_action(self, action):
+        """Get history by action type (created/updated/removed)"""
+        history = self._load_history()
+        return [h for h in history if h['action'] == action]
+    
+    def get_summary(self):
+        """Get summary statistics for discount creation history"""
+        history = self._load_history()
+        
+        if not history:
+            return {
+                'total_actions': 0,
+                'total_created': 0,
+                'total_updated': 0,
+                'total_removed': 0,
+                'unique_products': 0
+            }
+        
+        total_created = len([h for h in history if h['action'] == 'created'])
+        total_updated = len([h for h in history if h['action'] == 'updated'])
+        total_removed = len([h for h in history if h['action'] == 'removed'])
+        unique_products = len(set(h['product_id'] for h in history))
+        
+        return {
+            'total_actions': len(history),
+            'total_created': total_created,
+            'total_updated': total_updated,
+            'total_removed': total_removed,
+            'unique_products': unique_products
+        }
+
 
 # ============= BASE CLASS WITH ABSTRACTION =============
 class User(ABC):
@@ -35,7 +189,7 @@ class User(ABC):
     
     def set_password(self, password):
         """Setter for password with validation"""
-        if len(password) >= 3:  # Minimum length validation
+        if len(password) >= 3:
             self._password = password
             return True
         return False
@@ -92,7 +246,7 @@ class AdminUser(User):
     
     def get_allowed_sections(self):
         """Returns admin sections"""
-        return ['product-management', 'discount-management', 'settings']
+        return ['product-management', 'discount-management', 'settings', 'discount-history']
     
     # ============= ADMIN-SPECIFIC METHODS =============
     def can_manage_products(self):
@@ -154,17 +308,15 @@ class UserManager:
     
     def __init__(self):
         """Constructor initializes empty user storage"""
-        self._users = {}  # Encapsulated dictionary
-        self._current_user = None  # Track logged-in user
+        self._users = {}
+        self._current_user = None
         self._initialize_default_users()
     
     def _initialize_default_users(self):
         """Private method to add default users"""
-        # Create admin user using AdminUser class
         admin = AdminUser('gwapo@bisu.edu.ph', 'admin', 'admin')
         self._users[admin.get_email()] = admin
         
-        # Create regular user using RegularUser class
         user = RegularUser('pangit@bisu.edu.ph', 'user', 'user')
         self._users[user.get_email()] = user
     
@@ -228,6 +380,7 @@ class FlaskAppWrapper:
         """Constructor initializes Flask app and user manager"""
         self._app = Flask(name)  # Encapsulated Flask app
         self._user_manager = UserManager()  # Encapsulated user manager
+        self._discount_creation_history = DiscountCreationHistoryManager()  # Bag-o: encapsulated creation history
         self._setup_routes()  # Private method to setup routes
     
     # ============= GETTERS =============
@@ -238,6 +391,10 @@ class FlaskAppWrapper:
     def get_user_manager(self):
         """Get the user manager instance"""
         return self._user_manager
+    
+    def get_discount_creation_history(self):
+        """Get the discount creation history manager"""
+        return self._discount_creation_history
     
     # ============= ROUTE SETUP (Private Methods) =============
     def _setup_routes(self):
@@ -281,6 +438,118 @@ class FlaskAppWrapper:
                     )
             return redirect(url_for('login'))
         
+        @self._app.route('/admindashboard/settings')
+        def adminsettings():
+            if self._user_manager.get_current_user():
+                current_user = self._user_manager.get_current_user()
+                if current_user.get_role() == 'admin':
+                    return render_template(
+                        'adminsettings.html',
+                        username='Admin',
+                        role=current_user.get_role()
+                    )
+            return redirect(url_for('login'))
+        
+        # ============= DISCOUNT HISTORY ROUTE =============
+        @self._app.route('/admindashboard/discount-history')
+        def discount_history():
+            if self._user_manager.get_current_user():
+                current_user = self._user_manager.get_current_user()
+                if current_user.get_role() == 'admin':
+                    history = get_discount_history()
+                    summary = get_discount_summary()
+                    history.reverse()
+                    
+                    # Kuhaon ang discount creation history
+                    creation_history = self._discount_creation_history.get_all_history()
+                    creation_summary = self._discount_creation_history.get_summary()
+                    
+                    return render_template(
+                        'discount_history.html',
+                        username='Admin',
+                        history=history,
+                        total_saved=summary['total_saved'],
+                        total_transactions=summary['total_transactions'],
+                        avg_discount=summary['avg_discount'],
+                        creation_history=creation_history,
+                        summary=creation_summary
+                    )
+            return redirect(url_for('login'))
+        
+        # ============= API ROUTE PARA MAG-SAVE OG DISCOUNT CREATION =============
+        @self._app.route('/api/save_discount_creation', methods=['POST'])
+        def api_save_discount_creation():
+            if not self._user_manager.get_current_user():
+                return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+            
+            data = request.get_json()
+            
+            required_fields = ['action', 'product_id', 'discount_percent', 'start_date', 'end_date']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify({'success': False, 'message': f'Missing field: {field}'}), 400
+            
+            success = self._discount_creation_history.log_discount_action(
+                action=data['action'],
+                product_id=data['product_id'],
+                discount_percent=data['discount_percent'],
+                start_date=data['start_date'],
+                end_date=data['end_date'],
+                admin_email=self._user_manager.get_current_user().get_email()
+            )
+            
+            if success:
+                return jsonify({'success': True, 'message': 'Discount creation logged successfully!'})
+            else:
+                return jsonify({'success': False, 'message': 'Failed to log discount creation'}), 500
+        
+        # ============= API ROUTE PARA KUHAON ANG DISCOUNT CREATION HISTORY =============
+        @self._app.route('/api/get_discount_creation_history', methods=['GET'])
+        def api_get_discount_creation_history():
+            if not self._user_manager.get_current_user():
+                return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+            
+            history = self._discount_creation_history.get_all_history()
+            return jsonify({'success': True, 'history': history})
+        
+        # ============= API ROUTE PARA KUHAON ANG DISCOUNT CREATION SUMMARY =============
+        @self._app.route('/api/get_discount_creation_summary', methods=['GET'])
+        def api_get_discount_creation_summary():
+            if not self._user_manager.get_current_user():
+                return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+            
+            summary = self._discount_creation_history.get_summary()
+            return jsonify({'success': True, 'summary': summary})
+        
+        # ============= API ROUTE PARA MAG-SAVE OG TRANSACTION =============
+        @self._app.route('/api/save_discount_transaction', methods=['POST'])
+        def api_save_discount_transaction():
+            if not self._user_manager.get_current_user():
+                return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+            
+            data = request.get_json()
+            
+            required_fields = ['transaction_id', 'original_amount', 'discounted_amount', 'saved_amount']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify({'success': False, 'message': f'Missing field: {field}'}), 400
+            
+            transaction = {
+                'transaction_id': data['transaction_id'],
+                'customer_name': data.get('customer_name', 'Guest'),
+                'discount_code': data.get('discount_code', 'N/A'),
+                'discount_percentage': data.get('discount_percentage', 0),
+                'original_amount': float(data['original_amount']),
+                'discounted_amount': float(data['discounted_amount']),
+                'saved_amount': float(data['saved_amount']),
+                'user': self._user_manager.get_current_user().get_email()
+            }
+            
+            if save_discount_transaction(transaction):
+                return jsonify({'success': True, 'message': 'Transaction saved successfully!'})
+            else:
+                return jsonify({'success': False, 'message': 'Failed to save transaction'}), 500
+        
         @self._app.route('/userdashboard')
         def userdashboard():
             if self._user_manager.get_current_user():
@@ -304,8 +573,7 @@ class FlaskAppWrapper:
                         template_map = {
                             'pricing': 'pricingdashboard.html',
                             'discount': 'discountdashboard.html',
-                            'settings': 'settingsdashboard.html',                           
-                            
+                            'settings': 'settingsdashboard.html'
                         }
                         return render_template(
                             template_map.get(section, 'userdashboard.html'),
@@ -357,13 +625,21 @@ class FlaskAppWrapper:
 
 
 # ============= MAIN APPLICATION INSTANCE =============
-# Create the Flask app wrapper instance
+flask_app_wrapper = FlaskAppWrapper(__name__)
+
+application = flask_app_wrapper.get_wsgi_app()
+app = application
+
+if __name__ == '__main__':
+    flask_app_wrapper.run(debug=True)
+
+    # ============= MAIN APPLICATION INSTANCE =============
 flask_app_wrapper = FlaskAppWrapper(__name__)
 
 # For Vercel deployment - expose the WSGI app
 application = flask_app_wrapper.get_wsgi_app()
 app = application  # Also expose as 'app' for compatibility
 
-
+# ============= RUN THE APPLICATION =============
 if __name__ == '__main__':
     flask_app_wrapper.run(debug=True)
