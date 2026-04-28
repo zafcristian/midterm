@@ -86,3 +86,9 @@ localStorage:
 - Data stored as JSON strings
 - Persists across page reloads 
 
+
+PROGRESSIVE REPORT 
+
+WE change our discount rule instead of our discount has already assiged an expiration , we changed to manually set the discount duration
+
+we still not finished our module 3 but we start building it
