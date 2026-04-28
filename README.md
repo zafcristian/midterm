@@ -101,13 +101,13 @@ After adding discount for the product it will display the information on the dis
 
 
 **PREREQUISITES**
--Laptop huawei 
--VS CODE v1.117
--Python 3.14.4
--Flask v 3.1.3
--GIT v2.54.0
--Github
--Vercel  https://walara.vercel.app
+- Laptop huawei 
+- VS CODE v1.117
+- Python 3.14.4
+- Flask v 3.1.3
+- GIT v2.54.0
+- Github
+- Vercel  https://walara.vercel.app
 
 
 We have a problem on our module 3 the discount history management because it only work on the local like when we add discount to the product it will only work on local i mean the https//:http://127.0.0.1:5000 
