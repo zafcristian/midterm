@@ -108,10 +108,10 @@ After adding discount for the product it will display the information on the dis
 - GIT v2.54.0
 - Github
 - Vercel  https://walara.vercel.app/login
-   admin uname = gwapo@bisu.edu.ph
-   pass = admin
-   user uname= pangit@bisu.edu.ph
-   pass = user
+- admin uname = gwapo@bisu.edu.ph
+- pass = admin
+- user uname= pangit@bisu.edu.ph
+- pass = user
 
 
 We have a problem on our module 3 the discount history management because it only work on the local like when we add discount to the product it will only work on local i mean the https//:http://127.0.0.1:5000 
