@@ -31,33 +31,24 @@ PROGRESSIVE REPORT: Start making the module 2 our module 2 is discount managemen
         
  Features
 
-1. **Hardcoded Expiration Duration per Rule**
-Each discount rule now has a **fixed expiration time** based on the discount percentage:
+1. **Hardcoded Discount percent per Rule**
 
-| Discount Rule | Discount % | Expiration Duration |
-|---------------|-----------|-------------------|
-| Rule 1 | 10% | 1 Day |
-| Rule 2 | 20% | 2 Days |
-| Rule 3 | 30% | 3 Days |
-| Rule 4 | 40% | 4 Days |
-| Rule 5 | 50% | 7 Days |
+| Discount Rule | Discount % | 
+|---------------|-----------|
+| Rule 1 | 10% | 
+| Rule 2 | 20% | 
+| Rule 3 | 30% |
+| Rule 4 | 40% | 
+| Rule 5 | 50% |
 
-*No need to select expiration separately* - it's automatic based on the rule!
+On the expiration date the admin will manual add or edit the time of expiration
 
  2. **Real-Time Countdown Timer (HH:MM:SS)**
 - Displays remaining time in clear `HH:MM:SS` format
 - Updates **every second** for live countdown
 - Example: `02:15:45` = 2 hours, 15 minutes, 45 seconds remaining
 
- 3. **Auto-Expiration**
-- Expired discounts are **automatically removed** from LocalStorage every second
-- No manual deletion needed
-- Real-time removal from UI
-
-4. **Visual Alert - Expiring Soon**
-- Rows **highlight in yellow** when discount expires in less than 1 hour
-- Makes it easy to spot soon-to-expire discounts
-
+ 
  5. **Persistent Storage**
 - All discount data including expiration timestamp saved to **LocalStorage**
 - Data persists across browser sessions
