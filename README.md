@@ -8,7 +8,8 @@
 
 **3.RONALD GOMEZ**
 
-4.CRISTIAN ZAFRA
+**4.CRISTIAN ZAFRA**
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 PROGRESSIVE REPORT: Start designing our admin dashboard, we added some features/function like add prod id, set product price, and view the list of added product, added sidebar overlay button.
