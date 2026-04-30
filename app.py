@@ -1,34 +1,30 @@
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 from abc import ABC, abstractmethod
-import json
-import os
 from datetime import datetime
 
-# ============= DISCOUNT HISTORY MANAGER (Transaction History) =============
-DISCOUNT_HISTORY_FILE = 'discount_history.json'
+# ============= IN-MEMORY STORAGE (Dili JSON file) =============
+# Para sa Transaction History
+_discount_transaction_history = []
 
+# Para sa Discount Creation History
+_discount_creation_history = []
+
+
+# ============= DISCOUNT HISTORY MANAGER (Transaction History) =============
 def load_discount_history():
-    """Load discount history from file"""
-    if os.path.exists(DISCOUNT_HISTORY_FILE):
-        try:
-            with open(DISCOUNT_HISTORY_FILE, 'r') as f:
-                return json.load(f)
-        except:
-            return []
-    return []
+    """Load discount history from memory (list)"""
+    global _discount_transaction_history
+    return _discount_transaction_history
 
 def save_discount_transaction(transaction_data):
     """Save a discount transaction with date and time"""
-    history = load_discount_history()
+    global _discount_transaction_history
     
     transaction_data['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     transaction_data['date'] = datetime.now().strftime('%Y-%m-%d')
     transaction_data['time'] = datetime.now().strftime('%H:%M:%S')
     
-    history.append(transaction_data)
-    
-    with open(DISCOUNT_HISTORY_FILE, 'w') as f:
-        json.dump(history, f, indent=4)
+    _discount_transaction_history.append(transaction_data)
     
     return True
 
@@ -38,54 +34,32 @@ def get_discount_history():
 
 def get_discount_summary():
     """Get summary statistics from discount history"""
-    history = load_discount_history()
+    global _discount_transaction_history
     
-    if not history:
+    if not _discount_transaction_history:
         return {
             'total_transactions': 0,
             'total_saved': 0,
             'avg_discount': 0
         }
     
-    total_saved = sum(t.get('saved_amount', 0) for t in history)
-    total_discount_percent = sum(t.get('discount_percentage', 0) for t in history)
+    total_saved = sum(t.get('saved_amount', 0) for t in _discount_transaction_history)
+    total_discount_percent = sum(t.get('discount_percentage', 0) for t in _discount_transaction_history)
     
     return {
-        'total_transactions': len(history),
+        'total_transactions': len(_discount_transaction_history),
         'total_saved': total_saved,
-        'avg_discount': total_discount_percent / len(history) if history else 0
+        'avg_discount': total_discount_percent / len(_discount_transaction_history) if _discount_transaction_history else 0
     }
 
 
 # ============= DISCOUNT CREATION HISTORY MANAGER (ENCAPSULATED CLASS) =============
 class DiscountCreationHistoryManager:
-    """Manages discount creation/update/removal history - demonstrates encapsulation"""
+    """Manages discount creation/update/removal history - uses in-memory list"""
     
-    def __init__(self, history_file='discount_creation_history.json'):
-        """Constructor initializes the history file path"""
-        self._history_file = history_file
-        self._initialize_history_file()
-    
-    def _initialize_history_file(self):
-        """Private method to ensure history file exists"""
-        if not os.path.exists(self._history_file):
-            with open(self._history_file, 'w') as f:
-                json.dump([], f)
-    
-    def _load_history(self):
-        """Private method to load history from file"""
-        if os.path.exists(self._history_file):
-            try:
-                with open(self._history_file, 'r') as f:
-                    return json.load(f)
-            except:
-                return []
-        return []
-    
-    def _save_history(self, history):
-        """Private method to save history to file"""
-        with open(self._history_file, 'w') as f:
-            json.dump(history, f, indent=4)
+    def __init__(self):
+        """Constructor initializes the history list"""
+        self._history = []  # In-memory list imbes nga file
     
     # ============= PUBLIC METHODS =============
     def log_discount_action(self, action, product_id, discount_percent, start_date, end_date, admin_email):
@@ -93,8 +67,6 @@ class DiscountCreationHistoryManager:
         Log a discount creation/update/removal action
         action: 'created', 'updated', or 'removed'
         """
-        history = self._load_history()
-        
         entry = {
             'id': datetime.now().strftime('%Y%m%d%H%M%S%f'),
             'action': action,
@@ -108,31 +80,25 @@ class DiscountCreationHistoryManager:
             'admin': admin_email
         }
         
-        history.append(entry)
-        self._save_history(history)
+        self._history.append(entry)
         return True
     
     def get_all_history(self):
         """Get all discount creation history"""
-        history = self._load_history()
-        history.reverse()  # Latest first
-        return history
+        # Return reversed copy para latest first
+        return list(reversed(self._history))
     
     def get_history_by_product(self, product_id):
         """Get history for specific product"""
-        history = self._load_history()
-        return [h for h in history if h['product_id'] == product_id]
+        return [h for h in self._history if h['product_id'] == product_id]
     
     def get_history_by_action(self, action):
         """Get history by action type (created/updated/removed)"""
-        history = self._load_history()
-        return [h for h in history if h['action'] == action]
+        return [h for h in self._history if h['action'] == action]
     
     def get_summary(self):
         """Get summary statistics for discount creation history"""
-        history = self._load_history()
-        
-        if not history:
+        if not self._history:
             return {
                 'total_actions': 0,
                 'total_created': 0,
@@ -141,18 +107,23 @@ class DiscountCreationHistoryManager:
                 'unique_products': 0
             }
         
-        total_created = len([h for h in history if h['action'] == 'created'])
-        total_updated = len([h for h in history if h['action'] == 'updated'])
-        total_removed = len([h for h in history if h['action'] == 'removed'])
-        unique_products = len(set(h['product_id'] for h in history))
+        total_created = len([h for h in self._history if h['action'] == 'created'])
+        total_updated = len([h for h in self._history if h['action'] == 'updated'])
+        total_removed = len([h for h in self._history if h['action'] == 'removed'])
+        unique_products = len(set(h['product_id'] for h in self._history))
         
         return {
-            'total_actions': len(history),
+            'total_actions': len(self._history),
             'total_created': total_created,
             'total_updated': total_updated,
             'total_removed': total_removed,
             'unique_products': unique_products
         }
+    
+    def clear_history(self):
+        """Clear all history (admin only)"""
+        self._history = []
+        return True
 
 
 # ============= BASE CLASS WITH ABSTRACTION =============
@@ -378,10 +349,10 @@ class FlaskAppWrapper:
     
     def __init__(self, name):
         """Constructor initializes Flask app and user manager"""
-        self._app = Flask(name)  # Encapsulated Flask app
-        self._user_manager = UserManager()  # Encapsulated user manager
-        self._discount_creation_history = DiscountCreationHistoryManager()  # Bag-o: encapsulated creation history
-        self._setup_routes()  # Private method to setup routes
+        self._app = Flask(name)
+        self._user_manager = UserManager()
+        self._discount_creation_history = DiscountCreationHistoryManager()
+        self._setup_routes()
     
     # ============= GETTERS =============
     def get_flask_app(self):
@@ -460,7 +431,6 @@ class FlaskAppWrapper:
                     summary = get_discount_summary()
                     history.reverse()
                     
-                    # Kuhaon ang discount creation history
                     creation_history = self._discount_creation_history.get_all_history()
                     creation_summary = self._discount_creation_history.get_summary()
                     
@@ -550,6 +520,22 @@ class FlaskAppWrapper:
             else:
                 return jsonify({'success': False, 'message': 'Failed to save transaction'}), 500
         
+        # ============= ADMIN ROUTE PARA I-CLEAR ANG HISTORY =============
+        @self._app.route('/api/clear_discount_history', methods=['POST'])
+        def api_clear_discount_history():
+            if not self._user_manager.get_current_user():
+                return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+            
+            current_user = self._user_manager.get_current_user()
+            if current_user.get_role() != 'admin':
+                return jsonify({'success': False, 'message': 'Admin only'}), 403
+            
+            global _discount_transaction_history
+            _discount_transaction_history = []
+            self._discount_creation_history.clear_history()
+            
+            return jsonify({'success': True, 'message': 'All history cleared!'})
+        
         @self._app.route('/userdashboard')
         def userdashboard():
             if self._user_manager.get_current_user():
@@ -627,18 +613,9 @@ class FlaskAppWrapper:
 # ============= MAIN APPLICATION INSTANCE =============
 flask_app_wrapper = FlaskAppWrapper(__name__)
 
-application = flask_app_wrapper.get_wsgi_app()
-app = application
-
-if __name__ == '__main__':
-    flask_app_wrapper.run(debug=True)
-
-    # ============= MAIN APPLICATION INSTANCE =============
-flask_app_wrapper = FlaskAppWrapper(__name__)
-
 # For Vercel deployment - expose the WSGI app
 application = flask_app_wrapper.get_wsgi_app()
-app = application  # Also expose as 'app' for compatibility
+app = application
 
 # ============= RUN THE APPLICATION =============
 if __name__ == '__main__':
