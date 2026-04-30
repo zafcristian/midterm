@@ -80,6 +80,7 @@ localStorage:
 - Persists across page reloads 
 
 *MODULE 3*
+
 PROGRESSIVE REPORT 
 
 WE change our discount rule instead of our discount has already assiged an expiration , we changed to manually set the discount duration
