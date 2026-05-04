@@ -94,11 +94,11 @@
       }
 
       .stat-chip {
-        background: rgb(254, 255, 252);
+        background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         padding: 10px 20px;
         border-radius: 30px;
-        color: rgb(39, 36, 36);
+        color: white;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -285,14 +285,29 @@
         display: inline-block;
       }
 
-      /* Countdown */
-      .countdown-timer {
-        font-size: 12px;
-        font-family: monospace;
+      /* Countdown Box - Same as User Dashboard */
+      .countdown-box {
         background: #f0f0f0;
-        padding: 4px 8px;
-        border-radius: 6px;
+        padding: 8px 12px;
+        border-radius: 12px;
         display: inline-block;
+        min-width: 140px;
+        text-align: center;
+      }
+
+      .countdown-label {
+        font-size: 10px;
+        color: #666;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .countdown-timer {
+        font-size: 13px;
+        font-family: monospace;
+        font-weight: 600;
+        color: #333;
       }
 
       /* History Badges */
@@ -525,7 +540,6 @@
           <h3>Discount History Logs</h3>
           <div class="badge">Permanent Records</div>
         </div>
-        <p class="subtitle">Every create, update, or remove action is recorded here with date and time. These logs cannot be deleted.</p>
 
         <div class="search-bar">
           <input type="text" id="historySearch" placeholder="🔍 Search by Product ID or Action..." onkeyup="filterHistory()">
@@ -548,16 +562,16 @@
               </tr>
             </thead>
             <tbody id="historyTableBody">
-              <tr><td colspan="9" style="text-align: center;">📭 Loading discount history...</td></tr>
+              <tr><td colspan="9" style="text-align: center;">📭 Loading discount history...</span></td></tr>
             </tbody>
           </table>
         </div>
         
         <div class="stats-bar" style="margin-top: 20px; justify-content: center;">
-          <div class="stat-chip">✅ Total: <span id="totalLogsCount">0</span></div>
-          <div class="stat-chip">📌 Created: <span id="createdCount" style="color: #27ae60;">0</span></div>
-          <div class="stat-chip">✏️ Updated: <span id="updatedCount" style="color: #f39c12;">0</span></div>
-          <div class="stat-chip">🗑️ Removed: <span id="removedCount" style="color: #e74c3c;">0</span></div>
+          <div class="stat-chip" style="background: #f0f0f0; color:#333;">✅ Total: <span id="totalLogsCount">0</span></div>
+          <div class="stat-chip" style="background: #d4edda; color:#155724;">📌 Created: <span id="createdCount">0</span></div>
+          <div class="stat-chip" style="background: #fff3cd; color:#856404;">✏️ Updated: <span id="updatedCount">0</span></div>
+          <div class="stat-chip" style="background: #f8d7da; color:#721c24;">🗑️ Removed: <span id="removedCount">0</span></div>
         </div>
       </div>
     </div>
@@ -681,11 +695,6 @@
         }
       }
       
-      function resetHistorySearch() {
-        document.getElementById('historySearch').value = '';
-        filterHistory();
-      }
-
       function refreshHistory() {
         loadDiscountHistory();
         showToast("History refreshed!", "success");
@@ -762,7 +771,7 @@
             const hours = Math.floor((diff % (86400000)) / 3600000);
             const minutes = Math.floor((diff % 3600000) / 60000);
             const seconds = Math.floor((diff % 60000) / 1000);
-            return { type: "starts_in", days, hours, minutes, seconds, text: `Starts: ${days}d ${hours}h` };
+            return { type: "starts_in", days, hours, minutes, seconds };
           }
         } else if (status === "active") {
           const diff = end - now;
@@ -771,7 +780,7 @@
             const hours = Math.floor((diff % 86400000) / 3600000);
             const minutes = Math.floor((diff % 3600000) / 60000);
             const seconds = Math.floor((diff % 60000) / 1000);
-            return { type: "ends_in", days, hours, minutes, seconds, text: `Ends: ${days}d ${hours}h` };
+            return { type: "ends_in", days, hours, minutes, seconds };
           }
         }
         return null;
@@ -822,7 +831,23 @@
         rows.forEach(item => {
           const row = document.createElement("tr");
           const countdown = getCountdown(item.start_date, item.end_date, item.status);
-          let countdownHtml = countdown ? `<span class="countdown-timer">${countdown.text}</span>` : '<span class="countdown-timer">---</span>';
+          
+          let countdownHtml = '';
+          if (countdown) {
+            countdownHtml = `
+              <div class="countdown-box" id="countdown-${item.product_id}">
+                <span class="countdown-label">⏰ ${countdown.type === 'starts_in' ? 'STARTS IN' : 'ENDS IN'}</span>
+                <span class="countdown-timer">${countdown.days}d ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s</span>
+              </div>
+            `;
+          } else {
+            countdownHtml = `
+              <div class="countdown-box">
+                <span class="countdown-label">⏱️ STATUS</span>
+                <span class="countdown-timer">Expired</span>
+              </div>
+            `;
+          }
           
           row.innerHTML = `
             <td><strong>${item.product_id}</strong></td>
@@ -830,7 +855,7 @@
             <td><strong style="color:#ff6b6b;">${item.discount_percent}%</strong></td>
             <td class="discount-price">₱${formatPrice(item.discounted_price)}</td>
             <td>${getStatusText(item.status)}</td>
-            <td><div id="countdown-${item.product_id}">${countdownHtml}</div></td>
+            <td>${countdownHtml}</td>
             <td><button class="btn-danger remove-btn" data-product-id="${item.product_id}" data-discount-percent="${item.discount_percent}" data-start-date="${item.start_date}" data-end-date="${item.end_date}">Remove</button></td>
           `;
           discountTableBody.appendChild(row);

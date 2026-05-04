@@ -2,22 +2,15 @@ from flask import Flask, render_template, redirect, url_for, request, jsonify
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-# ============= IN-MEMORY STORAGE (Dili JSON file) =============
-# Para sa Transaction History
 _discount_transaction_history = []
 
-# Para sa Discount Creation History
 _discount_creation_history = []
 
-
-# ============= DISCOUNT HISTORY MANAGER (Transaction History) =============
 def load_discount_history():
-    """Load discount history from memory (list)"""
     global _discount_transaction_history
     return _discount_transaction_history
 
 def save_discount_transaction(transaction_data):
-    """Save a discount transaction with date and time"""
     global _discount_transaction_history
     
     transaction_data['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -29,11 +22,9 @@ def save_discount_transaction(transaction_data):
     return True
 
 def get_discount_history():
-    """Get all discount history"""
     return load_discount_history()
 
 def get_discount_summary():
-    """Get summary statistics from discount history"""
     global _discount_transaction_history
     
     if not _discount_transaction_history:
@@ -52,21 +43,11 @@ def get_discount_summary():
         'avg_discount': total_discount_percent / len(_discount_transaction_history) if _discount_transaction_history else 0
     }
 
-
-# ============= DISCOUNT CREATION HISTORY MANAGER (ENCAPSULATED CLASS) =============
-class DiscountCreationHistoryManager:
-    """Manages discount creation/update/removal history - uses in-memory list"""
-    
+class DiscountCreationHistoryManager:  
     def __init__(self):
-        """Constructor initializes the history list"""
-        self._history = []  # In-memory list imbes nga file
+        self._history = []
     
-    # ============= PUBLIC METHODS =============
     def log_discount_action(self, action, product_id, discount_percent, start_date, end_date, admin_email):
-        """
-        Log a discount creation/update/removal action
-        action: 'created', 'updated', or 'removed'
-        """
         entry = {
             'id': datetime.now().strftime('%Y%m%d%H%M%S%f'),
             'action': action,
@@ -84,20 +65,15 @@ class DiscountCreationHistoryManager:
         return True
     
     def get_all_history(self):
-        """Get all discount creation history"""
-        # Return reversed copy para latest first
         return list(reversed(self._history))
     
     def get_history_by_product(self, product_id):
-        """Get history for specific product"""
         return [h for h in self._history if h['product_id'] == product_id]
     
     def get_history_by_action(self, action):
-        """Get history by action type (created/updated/removed)"""
         return [h for h in self._history if h['action'] == action]
     
     def get_summary(self):
-        """Get summary statistics for discount creation history"""
         if not self._history:
             return {
                 'total_actions': 0,
@@ -121,90 +97,63 @@ class DiscountCreationHistoryManager:
         }
     
     def clear_history(self):
-        """Clear all history (admin only)"""
         self._history = []
         return True
-
-
-# ============= BASE CLASS WITH ABSTRACTION =============
-class User(ABC):
-    """Base abstract class for all users - demonstrates inheritance"""
     
+class User(ABC):
     def __init__(self, email, password, role):
-        """Constructor - initializes user attributes"""
-        self._email = email          # Encapsulated (protected)
-        self._password = password    # Encapsulated
-        self._role = role            # Encapsulated
+        self._email = email
+        self._password = password
+        self._role = role
         self._is_authenticated = False
     
-    # ============= GETTERS (Encapsulation) =============
     def get_email(self):
-        """Getter for email"""
         return self._email
     
     def get_role(self):
-        """Getter for role"""
         return self._role
     
     def is_authenticated(self):
-        """Getter for authentication status"""
         return self._is_authenticated
     
-    # ============= SETTERS (Encapsulation) =============
     def set_email(self, email):
-        """Setter for email with validation"""
         if '@' in email and '.' in email:
             self._email = email
             return True
         return False
     
     def set_password(self, password):
-        """Setter for password with validation"""
         if len(password) >= 3:
             self._password = password
             return True
         return False
     
-    # ============= BUSINESS METHODS =============
     def authenticate(self, password):
-        """Method to authenticate user"""
         if self._password == password:
             self._is_authenticated = True
             return True
         return False
     
     def logout(self):
-        """Method to logout user"""
         self._is_authenticated = False
     
     @abstractmethod
     def get_dashboard_template(self):
-        """Abstract method - forces child classes to implement"""
         pass
     
     @abstractmethod
     def get_allowed_sections(self):
-        """Abstract method for role-based sections"""
         pass
 
-
-# ============= INHERITANCE: CHILD CLASS 1 =============
 class AdminUser(User):
-    """Admin user class - inherits from User"""
-    
     def __init__(self, email, password, role="admin"):
-        """Constructor calls parent constructor"""
         super().__init__(email, password, role)
         self._admin_permissions = ['product_management', 'discount_management', 'user_management']
     
-    # ============= GETTERS =============
     def get_admin_permissions(self):
-        """Get admin-specific permissions"""
         return self._admin_permissions
-    
-    # ============= SETTERS =============
+
     def set_admin_permissions(self, permissions):
-        """Set admin permissions"""
         if isinstance(permissions, list):
             self._admin_permissions = permissions
             return True
@@ -212,120 +161,89 @@ class AdminUser(User):
     
     # ============= IMPLEMENTING ABSTRACT METHODS =============
     def get_dashboard_template(self):
-        """Returns admin dashboard template"""
         return 'admindashboard.html'
     
     def get_allowed_sections(self):
-        """Returns admin sections"""
         return ['product-management', 'discount-management', 'settings', 'discount-history']
     
-    # ============= ADMIN-SPECIFIC METHODS =============
     def can_manage_products(self):
-        """Check if admin can manage products"""
         return 'product_management' in self._admin_permissions
     
     def can_manage_discounts(self):
-        """Check if admin can manage discounts"""
         return 'discount_management' in self._admin_permissions
 
 
-# ============= INHERITANCE: CHILD CLASS 2 =============
 class RegularUser(User):
-    """Regular user class - inherits from User"""
     
     def __init__(self, email, password, role="user"):
-        """Constructor calls parent constructor"""
         super().__init__(email, password, role)
         self._user_preferences = {
             'theme': 'light',
             'notifications': True
         }
     
-    # ============= GETTERS =============
     def get_user_preferences(self):
-        """Get user preferences"""
         return self._user_preferences
     
     def get_preference(self, key):
-        """Get specific preference"""
         return self._user_preferences.get(key, None)
     
     # ============= SETTERS =============
     def set_user_preferences(self, preferences):
-        """Set user preferences"""
         if isinstance(preferences, dict):
             self._user_preferences.update(preferences)
             return True
         return False
     
     def set_preference(self, key, value):
-        """Set specific preference"""
         self._user_preferences[key] = value
         return True
     
     # ============= IMPLEMENTING ABSTRACT METHODS =============
     def get_dashboard_template(self):
-        """Returns user dashboard template"""
         return 'userdashboard.html'
     
     def get_allowed_sections(self):
-        """Returns user sections"""
         return ['pricing', 'discount', 'settings']
 
-
-# ============= USER MANAGEMENT CLASS =============
 class UserManager:
-    """Manages all users - demonstrates encapsulation and collection management"""
-    
     def __init__(self):
-        """Constructor initializes empty user storage"""
         self._users = {}
         self._current_user = None
         self._initialize_default_users()
     
     def _initialize_default_users(self):
-        """Private method to add default users"""
         admin = AdminUser('gwapo@bisu.edu.ph', 'admin', 'admin')
         self._users[admin.get_email()] = admin
         
         user = RegularUser('pangit@bisu.edu.ph', 'user', 'user')
         self._users[user.get_email()] = user
-    
-    # ============= GETTERS =============
+
     def get_user(self, email):
-        """Get user by email"""
         return self._users.get(email, None)
     
     def get_current_user(self):
-        """Get currently logged-in user"""
         return self._current_user
     
     def get_all_users(self):
-        """Get all users (returns copy for encapsulation)"""
         return self._users.copy()
     
     def is_user_exists(self, email):
-        """Check if user exists"""
         return email in self._users
-    
-    # ============= SETTERS =============
+
     def add_user(self, user):
-        """Add new user"""
         if isinstance(user, User) and user.get_email() not in self._users:
             self._users[user.get_email()] = user
             return True
         return False
     
     def remove_user(self, email):
-        """Remove user by email"""
         if email in self._users:
             del self._users[email]
             return True
         return False
-    
-    # ============= AUTHENTICATION METHODS =============
+
     def authenticate_user(self, email, password):
-        """Authenticate user and set as current user"""
         user = self.get_user(email)
         if user and user.authenticate(password):
             self._current_user = user
@@ -333,44 +251,30 @@ class UserManager:
         return False
     
     def logout_current_user(self):
-        """Logout current user"""
         if self._current_user:
             self._current_user.logout()
             self._current_user = None
     
     def is_user_authenticated(self):
-        """Check if any user is logged in"""
         return self._current_user is not None
 
-
-# ============= FLASK APPLICATION CLASS =============
 class FlaskAppWrapper:
-    """Wrapper class for Flask application - demonstrates OOP with Flask"""
-    
     def __init__(self, name):
-        """Constructor initializes Flask app and user manager"""
         self._app = Flask(name)
         self._user_manager = UserManager()
         self._discount_creation_history = DiscountCreationHistoryManager()
         self._setup_routes()
-    
-    # ============= GETTERS =============
+
     def get_flask_app(self):
-        """Get the underlying Flask app"""
         return self._app
     
     def get_user_manager(self):
-        """Get the user manager instance"""
         return self._user_manager
     
     def get_discount_creation_history(self):
-        """Get the discount creation history manager"""
         return self._discount_creation_history
-    
-    # ============= ROUTE SETUP (Private Methods) =============
+
     def _setup_routes(self):
-        """Private method to setup all routes"""
-        
         @self._app.route('/')
         def home():
             return '<meta charset="UTF-8"><h1>KINSA KA OOOIIIEEEEE ABOT MAN KA DIREEEEE &#128544;</h1>'
@@ -421,7 +325,6 @@ class FlaskAppWrapper:
                     )
             return redirect(url_for('login'))
         
-        # ============= DISCOUNT HISTORY ROUTE =============
         @self._app.route('/admindashboard/discount-history')
         def discount_history():
             if self._user_manager.get_current_user():
@@ -472,8 +375,7 @@ class FlaskAppWrapper:
                 return jsonify({'success': True, 'message': 'Discount creation logged successfully!'})
             else:
                 return jsonify({'success': False, 'message': 'Failed to log discount creation'}), 500
-        
-        # ============= API ROUTE PARA KUHAON ANG DISCOUNT CREATION HISTORY =============
+
         @self._app.route('/api/get_discount_creation_history', methods=['GET'])
         def api_get_discount_creation_history():
             if not self._user_manager.get_current_user():
@@ -481,8 +383,7 @@ class FlaskAppWrapper:
             
             history = self._discount_creation_history.get_all_history()
             return jsonify({'success': True, 'history': history})
-        
-        # ============= API ROUTE PARA KUHAON ANG DISCOUNT CREATION SUMMARY =============
+
         @self._app.route('/api/get_discount_creation_summary', methods=['GET'])
         def api_get_discount_creation_summary():
             if not self._user_manager.get_current_user():
@@ -490,8 +391,7 @@ class FlaskAppWrapper:
             
             summary = self._discount_creation_history.get_summary()
             return jsonify({'success': True, 'summary': summary})
-        
-        # ============= API ROUTE PARA MAG-SAVE OG TRANSACTION =============
+
         @self._app.route('/api/save_discount_transaction', methods=['POST'])
         def api_save_discount_transaction():
             if not self._user_manager.get_current_user():
@@ -519,8 +419,7 @@ class FlaskAppWrapper:
                 return jsonify({'success': True, 'message': 'Transaction saved successfully!'})
             else:
                 return jsonify({'success': False, 'message': 'Failed to save transaction'}), 500
-        
-        # ============= ADMIN ROUTE PARA I-CLEAR ANG HISTORY =============
+
         @self._app.route('/api/clear_discount_history', methods=['POST'])
         def api_clear_discount_history():
             if not self._user_manager.get_current_user():
@@ -598,25 +497,19 @@ class FlaskAppWrapper:
                     return render_template('login.html', message='Invalid username or password')
             
             return render_template('login.html', message='')
-    
-    # ============= RUN METHOD =============
+
     def run(self, debug=True):
         """Run the Flask application"""
         self._app.run(debug=debug)
-    
-    # ============= EXPOSE FOR VERCEL =============
+
     def get_wsgi_app(self):
         """Return WSGI application for Vercel deployment"""
         return self._app
-
-
-# ============= MAIN APPLICATION INSTANCE =============
+    
 flask_app_wrapper = FlaskAppWrapper(__name__)
 
-# For Vercel deployment - expose the WSGI app
 application = flask_app_wrapper.get_wsgi_app()
 app = application
 
-# ============= RUN THE APPLICATION =============
 if __name__ == '__main__':
     flask_app_wrapper.run(debug=True)
