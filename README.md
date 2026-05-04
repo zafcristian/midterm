@@ -1,9 +1,15 @@
         PRODUCT PRICING AND DISCOUNT MANAGEMENT SYSTEM
-GROUP 12 BSCS 1B
-1.CHARLES INSON
-2.PENIEL LANOY
-3.RONALD GOMEZ
-4.CRISTIAN ZAFRA
+        
+**GROUP 12 BSCS 1B**
+
+**1.CHARLES INSON**
+
+**2.PENIEL LANOY**
+
+**3.RONALD GOMEZ**
+
+**4.CRISTIAN ZAFRA**
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 PROGRESSIVE REPORT: Start designing our admin dashboard, we added some features/function like add prod id, set product price, and view the list of added product, added sidebar overlay button.
@@ -29,6 +35,8 @@ and also we add sidebar overlay button to edit product and edit the price of the
 *MODULE 2*
 
 PROGRESSIVE REPORT: Start making the module 2 our module 2 is discount management system
+
+Enter PRODUCT ID and then set discount rule and duration
 
         
  Features
@@ -101,7 +109,7 @@ After adding discount for the product it will display the information on the dis
 - Flask v 3.1.3
 - GIT v2.54.0
 - Github
-- Vercel  https://walara.vercel.app/login
+- Vercel  https://discountmanagement.vercel.app/login
 - admin uname = gwapo@bisu.edu.ph
 - pass = admin
 - user uname= pangit@bisu.edu.ph
@@ -110,3 +118,7 @@ After adding discount for the product it will display the information on the dis
 
 We have a problem on our module 3 the discount history management because it only work on the local like when we add discount to the product it will only work on local i mean the https//:http://127.0.0.1:5000 
 but when we used the live vercel when we start added discount to product it wll not display to the dashboard we ask AI on how to fix but it said we need a DATA BASE but we don't know how to create that so thats the problem we need to fix.
+
+PROGRESSIVE REPORT:
+
+We fix our problem about discount history we fixed it by, instead using json we used library or list on the app.py so when we add discount it will already display on history list and it functioning on the live vercel
