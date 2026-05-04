@@ -122,3 +122,6 @@ but when we used the live vercel when we start added discount to product it wll 
 PROGRESSIVE REPORT:
 
 We fix our problem about discount history we fixed it by, instead using json we used library or list on the app.py so when we add discount it will already display on history list and it functioning on the live vercel
+
+
+FINAL COMMIT OUR PROJECT
