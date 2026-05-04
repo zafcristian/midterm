@@ -4,7 +4,6 @@ from datetime import datetime
 
 _discount_transaction_history = []
 
-_discount_creation_history = []
 
 def load_discount_history():
     global _discount_transaction_history
